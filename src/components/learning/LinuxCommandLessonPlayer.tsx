@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, CornerDownRight, Play, RotateCcw, Terminal, Lightbulb, GitBranch } from 'lucide-react';
 import TerminalWalkthrough from './TerminalWalkthrough';
 import type { Lesson } from '../../types/lesson';
@@ -37,6 +37,14 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   const [history, setHistory] = useState<TerminalResult[]>([]);
   const [showHints, setShowHints] = useState(false);
   const [ranCurrentStep, setRanCurrentStep] = useState(false);
+  const previousStepIndex = useRef(stepIndex);
+
+  useEffect(() => {
+    if (previousStepIndex.current !== stepIndex) {
+      previousStepIndex.current = stepIndex;
+      document.getElementById('command-step-description')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [stepIndex]);
 
   useEffect(() => {
     const first = commandLessons[lesson.id]?.steps[0];
@@ -113,7 +121,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       <div className="command-learning-main">
         <article className="panel command-concept-panel">
           <div className="panel-heading"><span className="step-number">01</span><div><h2>Understand before typing</h2><p>What it does, when to use it, and what changes.</p></div></div>
-          <h3 className="command-step-title">{step.title}</h3>
+          <h3 id="command-step-description" className="command-step-title">{step.title}</h3>
           <p className="body-copy">{step.purpose}</p>
           <div className="beginner-explanation"><h4>Plain-English explanation</h4><p>{step.id === 'pwd' ? 'Think of Linux as a huge building made of folders. pwd is like asking, “Which room am I standing in?” It prints the complete address of the current folder, starting from /. It does not list the room’s contents or move you anywhere.' : step.id === 'ls' || step.id === 'ls-details' ? 'Imagine opening a folder in a file manager. ls gives you a text list of what is inside the folder you are currently in. It is an inspection command: by itself, it does not move you, create files, or delete anything.' : step.id.startsWith('cd') ? 'Think of the terminal as a person standing in one folder. cd tells that person to move to another folder. A relative destination is interpreted from where you are now; an absolute destination starts at /. After moving, use pwd to confirm the new location.' : 'This command asks Linux to inspect or change a specific part of the system. Read the command, identify its target, run it, and compare the result with the state before the command.'}</p><p><b>Beginner habit:</b> before you run a command, say what you expect to happen. After it runs, compare the real output with your prediction. If the result differs, inspect the current state before trying random commands.</p></div>
           <div className="mental-model-box"><Lightbulb size={18}/><div><b>Mental model</b><p>{definition.mentalModel}</p></div></div>

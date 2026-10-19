@@ -55,6 +55,9 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   const [ranCurrentStep, setRanCurrentStep] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [progressLoadedFor, setProgressLoadedFor] = useState('');
+  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizPassed, setQuizPassed] = useState(false);
   const previousStepIndex = useRef(stepIndex);
 
   useEffect(() => {
@@ -97,8 +100,21 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   }, [lesson.id]);
 
   const step: CommandStep | undefined = steps[stepIndex];
+  const quiz = step ? (step.id === 'pwd'
+    ? { question: 'What does pwd print?', options: ['The current working directory path', 'All files in the directory', 'The Linux user password'], correct: 0, explanation: 'pwd prints the absolute path of the current working directory.' }
+    : step.id.startsWith('cd')
+      ? { question: 'What is the main effect of cd ros2_ws when that folder exists?', options: ['It deletes ros2_ws', 'It changes the shell into ros2_ws', 'It prints every file in ros2_ws'], correct: 1, explanation: 'cd changes the shell’s current working directory; it normally prints no output on success.' }
+      : step.id === 'ls' || step.id === 'ls-details'
+        ? { question: 'What does ls do by itself?', options: ['Moves into the first folder', 'Lists directory entries', 'Changes file permissions'], correct: 1, explanation: 'ls lists directory entries. Options such as -l add details; -a includes hidden entries.' }
+        : { question: 'What is the safest way to verify what a command did?', options: ['Assume it worked if there is no error', 'Run random commands until the output changes', 'Compare the result with the expected state and inspect it'], correct: 2, explanation: 'Compare the output and system state with your prediction; inspect before making further changes.' }) : null;
   const progress = steps.length ? ((stepIndex + 1) / steps.length) * 100 : 0;
   const pathParts = useMemo(() => cwd.split('/').filter(Boolean), [cwd]);
+
+  useEffect(() => {
+    setQuizAnswer(null);
+    setQuizSubmitted(false);
+    setQuizPassed(false);
+  }, [step?.id]);
 
   if (!definition || !step) {
     return <section className="lesson-page"><button className="back-link" onClick={onBack}>← Back to learning path</button><article className="panel"><h1>{lesson.title}</h1><p>The command-by-command lesson is being prepared for this topic.</p><button className="button-secondary" onClick={onBack}>Back to path</button></article></section>;
@@ -293,15 +309,17 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
           {history.length > 0 && <div className="terminal-recent-history"><span className="eyebrow">RECENT PRACTICE</span>{history.slice(0, 4).map((item, index) => <button key={item.command + index} onClick={() => { setInput(item.command); setResult(item); setCwd(item.cwd); }}><code>{item.command}</code><span>{item.output.split('\n')[0] || item.status}</span></button>)}</div>}
         </article>
         <article className="panel command-check-panel lesson-stage-check">
-          <div className="panel-heading"><span className="step-number purple">05</span><div><h2>Quick recall</h2><p>Can you explain it without looking?</p></div></div>
-          <p>{step.id === 'pwd' ? 'Which command tells you where the terminal is currently located?' : step.id.startsWith('cd') ? 'Which part of this command specifies the destination directory?' : step.id === 'ls' || step.id === 'ls-details' ? 'Does this command change the current directory?' : 'What does this command inspect or change, and what would you check next?'}</p>
-          <button className="text-button" onClick={() => setShowHints((value) => !value)}>{showHints ? 'Hide answer' : 'Reveal answer'} <ArrowRight size={14}/></button>
-          {showHints && <div className="explanation-box good"><b>Explain it in your own words</b><p>{step.purpose} {step.commonMistake}</p></div>}
+          <div className="panel-heading"><span className="step-number purple">05</span><div><h2>Knowledge check</h2><p>Answer correctly to pass this command’s check.</p></div></div>
+          {quiz && <div className="knowledge-check">
+            <p className="knowledge-check-question">{quiz.question}</p>
+            <div className="knowledge-check-options">{quiz.options.map((option, index) => <button type="button" key={option} disabled={quizSubmitted} className={quizSubmitted && index === quiz.correct ? 'correct' : quizSubmitted && index === quizAnswer ? 'incorrect' : quizAnswer === index ? 'selected' : ''} onClick={() => setQuizAnswer(index)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}</div>
+            {!quizSubmitted ? <button className="button-primary knowledge-check-submit" disabled={quizAnswer === null} onClick={() => { setQuizSubmitted(true); setQuizPassed(quizAnswer === quiz.correct); }}>{'Check answer'}</button> : <div className={'knowledge-check-feedback ' + (quizPassed ? 'passed' : 'retry')}><b>{quizPassed ? 'Correct — check passed' : 'Not quite — try again'}</b><p>{quiz.explanation}</p>{!quizPassed && <button className="button-secondary" onClick={() => { setQuizAnswer(null); setQuizSubmitted(false); }}>Try again</button>}</div>}
+          </div>}
           <div className="command-step-navigation">
             <button className="button-secondary" disabled={stepIndex === 0} onClick={() => chooseStep(stepIndex - 1)}><ArrowLeft size={15}/> Previous command</button>
             <button className="button-primary" onClick={nextStep} disabled={stepIndex === steps.length - 1}>{stepIndex === steps.length - 1 ? 'All commands complete' : 'Next command'} {stepIndex === steps.length - 1 ? <CheckCircle2 size={15}/> : <ArrowRight size={15}/>}</button>
           </div>
-          {stepIndex === steps.length - 1 && <button className={'button-secondary full command-complete-button ' + (completed ? 'is-complete' : '')} onClick={() => onComplete(lesson.id)}>{completed ? <><CheckCircle2 size={16}/> Lesson completed</> : <>Complete lesson <CheckCircle2 size={16}/></>}</button>}
+          {stepIndex === steps.length - 1 && <button className={'button-secondary full command-complete-button ' + (completed ? 'is-complete' : '')} onClick={() => onComplete(lesson.id)} disabled={!quizPassed}>{completed ? <><CheckCircle2 size={16}/> Lesson completed</> : <>Complete lesson <CheckCircle2 size={16}/></>}</button>}
           <div className="step-dots" aria-label="Command steps">{steps.map((item, index) => <button key={item.id} className={index === stepIndex ? 'active' : completedSteps.includes(item.id) ? 'visited completed' : ''} aria-label={(completedSteps.includes(item.id) ? 'Completed: ' : 'Go to ') + item.title} title={(completedSteps.includes(item.id) ? 'Completed · ' : '') + item.title} onClick={() => chooseStep(index)}>{completedSteps.includes(item.id) ? '✓' : ''}</button>)}</div>
         </article>
         <div className="command-bottom-navigation"><div className="lesson-navigation-label"><b>Lesson navigation</b><span>Move between topics independently of command steps.</span></div><div className="lesson-navigation-actions"><button className="button-secondary" disabled={!canGoPrevious} onClick={onPreviousLesson}><ArrowLeft size={15}/> Previous lesson</button><button className="button-primary" disabled={!canGoNext} onClick={onNextLesson}>Next lesson <ArrowRight size={15}/></button></div></div>

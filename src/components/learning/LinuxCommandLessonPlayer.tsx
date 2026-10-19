@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, CornerDownRight, Play, RotateCcw, Terminal, Lightbulb, GitBranch } from 'lucide-react';
 import TerminalWalkthrough from './TerminalWalkthrough';
 import TerminalCommandAnimation from './TerminalCommandAnimation';
+import PathPredictionPractice from './PathPredictionPractice';
 import type { Lesson } from '../../types/lesson';
 import type { CommandStep } from '../../types/commandLesson';
 import { commandLessons } from '../../data/commandLessons';
@@ -111,6 +112,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     </div>
 
     {lesson.id === 'linux-files' && <TerminalWalkthrough />}
+    {lesson.id === 'linux-files' && <PathPredictionPractice />}
 
     <div className="command-progress">
       <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')}</span><b>{step.title}</b></div>

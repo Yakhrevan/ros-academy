@@ -233,6 +233,30 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command.startsWith('sudo apt install ')) return { command, output: 'Simulated package installation preview; nothing was installed.', status: 'No package manager was run.', cwd };
   if (command === 'source /opt/ros/humble/setup.bash') { simulatedRosDistro = 'humble'; return { command, output: '', status: 'Simulated ROS 2 Humble environment loaded. Run echo $ROS_DISTRO to verify; your host shell is unchanged.', cwd }; }
   if (command === 'echo $ROS_DISTRO') return { command, output: simulatedRosDistro, status: simulatedRosDistro ? 'Training environment only.' : 'ROS_DISTRO is not set in this simulated shell.', cwd };
+  const redirectMatch = command.match(/^(.+?)\\s*(>>|>)\\s*(.+)$/);
+  if (redirectMatch) {
+    const left = redirectMatch[1].trim();
+    const append = redirectMatch[2] === '>>';
+    const target = redirectMatch[3].trim().replace(/^['"]|['"]$/g, '');
+    const path = resolvePath(target, cwd);
+    const parent = path.slice(0, path.lastIndexOf('/')) || '/';
+    const name = path.split('/').pop() || '';
+    if (!Object.prototype.hasOwnProperty.call(FS, parent) || !FS[parent]) return { command, output: '', status: 'bash: cannot redirect to a path whose parent directory does not exist: ' + parent, cwd };
+    if (FS[path]) return { command, output: '', status: 'bash: cannot overwrite a directory: ' + path, cwd };
+    let content = '';
+    if (left.startsWith('echo ')) content = left.slice(5).replace(/^['"]|['"]$/g, '') + '\\n';
+    else if (left.startsWith('printf ')) {
+      const quoted = left.slice(7).trim().replace(/^['"]|['"]$/g, '');
+      content = quoted.replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');
+    } else return { command, output: '', status: 'This simulator supports redirection with echo and printf only. Example: echo hello > notes.txt', cwd };
+    if (!Object.prototype.hasOwnProperty.call(FS, path)) {
+      FS[path] = [];
+      if (!FS[parent].includes(name)) FS[parent].push(name);
+    }
+    virtualFileContents[path] = append ? (virtualFileContents[path] || '') + content : content;
+    return { command, output: '', status: (append ? 'Appended to ' : 'Wrote ') + path + ' in the virtual filesystem only. Read it with cat to verify.', cwd };
+  }
+
   if (command.startsWith('grep ')) {
     const args = command.slice(5).trim().split(/\s+/);
     if (args.length < 2) return { command, output: '', status: 'Usage: grep PATTERN FILE', cwd };

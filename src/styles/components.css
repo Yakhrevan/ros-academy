@@ -225,3 +225,17 @@
 .next-pwd-hint code,.command-animation-result p code{color:#a7cbff;font-family:'DM Mono',monospace}
 .after-cd-prompt{margin-top:15px;padding-top:12px;border-top:1px dashed #405571}
 .pwd-transition-note{margin:8px 0 0;color:#9eb0c7;font-size:11px}
+
+
+/* Visual file explorer for ls command output */
+.ls-current-location{display:grid;gap:4px;margin:10px 0 12px;padding:9px 10px;border-radius:7px;background:#0d211f}
+.ls-current-location span{color:#8eb6a3;font-size:10px}
+.ls-current-location code{color:#b5ffdc;font:11px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.ls-entry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.ls-entry{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:5px 8px;padding:10px;border:1px solid #344b65;border-radius:8px;background:#192b41;min-width:0}
+.ls-entry svg{grid-row:span 2;color:#8dbbff}
+.ls-entry.is-file svg{color:#aebed3}
+.ls-entry code{color:#eef5ff;font:11px/1.5 'DM Mono',monospace;overflow-wrap:anywhere}
+.ls-entry>span{color:#9cb0c8;font-size:9px}
+.ls-entry.is-folder{border-color:#41658a;background:#1b334d}
+@media(max-width:420px){.ls-entry-grid{grid-template-columns:1fr}.ls-entry{grid-template-columns:22px minmax(0,1fr) auto}.ls-entry svg{grid-row:auto}}

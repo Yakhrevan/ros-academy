@@ -46,6 +46,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     return aIndex - bIndex;
   });
   const [stepIndex, setStepIndex] = useState(0);
+  const [activeStage, setActiveStage] = useState<'learn' | 'watch' | 'practice' | 'check'>('learn');
   const [cwd, setCwd] = useState(INITIAL_CWD);
   const [input, setInput] = useState(steps[0]?.command ?? 'pwd');
   const [result, setResult] = useState<TerminalResult>({ command: 'pwd', output: INITIAL_CWD, status: 'Ready. Run a command to experiment in this simulated shell.', cwd: INITIAL_CWD });
@@ -64,6 +65,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   useEffect(() => {
     const first = commandLessons[lesson.id]?.steps[0];
     setStepIndex(0);
+    setActiveStage('learn');
     setCwd(INITIAL_CWD);
     setInput(first?.command ?? 'pwd');
     setResult({ command: 'pwd', output: INITIAL_CWD, status: 'Ready. Run a command to experiment in this simulated shell.', cwd: INITIAL_CWD });
@@ -112,7 +114,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     else onNextLesson();
   };
 
-  return <section className="lesson-page command-lesson-page">
+  return <section className="lesson-page command-lesson-page" data-learning-stage={activeStage}>
     <button className="back-link" onClick={onBack}>← Back to {lesson.phase}</button>
     <div className="command-lesson-hero">
       <div>
@@ -156,10 +158,22 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       <span className="command-progress-count">{Math.round(progress)}%</span>
     </div>
 
-    <TerminalCommandAnimation key={step.id} command={step.command} output={step.expectedOutput} cwd={cwd} title={step.title} />
+    <nav className="lesson-stage-nav" aria-label="Lesson stages">
+      {([
+        { id: 'learn', number: '01', title: 'Learn', detail: 'Understand the idea' },
+        { id: 'watch', number: '02', title: 'Watch', detail: 'See it in action' },
+        { id: 'practice', number: '03', title: 'Practise', detail: 'Run the command' },
+        { id: 'check', number: '04', title: 'Check', detail: 'Test your understanding' },
+      ] as const).map((stage) => <button key={stage.id} type="button" className={activeStage === stage.id ? 'active' : ''} aria-current={activeStage === stage.id ? 'step' : undefined} onClick={() => { setActiveStage(stage.id); document.getElementById('lesson-stage-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
+        <span className="lesson-stage-number">{stage.number}</span><span className="lesson-stage-copy"><b>{stage.title}</b><small>{stage.detail}</small></span>{activeStage === stage.id && <span className="lesson-stage-active-dot" />}
+      </button>)}
+    </nav>
+
+    <div id="lesson-stage-content">
+      <div className="lesson-stage-watch"><TerminalCommandAnimation key={step.id} command={step.command} output={step.expectedOutput} cwd={cwd} title={step.title} /></div>
 
     <div className="command-learning-layout">
-      <div className="command-learning-main">
+      <div className="command-learning-main lesson-stage-learn">
         <article className="panel command-concept-panel">
           <div className="panel-heading"><span className="step-number">01</span><div><h2>Understand before typing</h2><p>What it does, when to use it, and what changes.</p></div></div>
           <h3 id="command-step-description" className="command-step-title">{step.title}</h3>
@@ -233,7 +247,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       </div>
 
       <aside className="command-practice-column">
-        <article className="panel embedded-terminal-panel">
+        <article className="panel embedded-terminal-panel lesson-stage-practice">
           <div className="panel-heading"><span className="step-number">04</span><div><h2>Try it here</h2><p>Example and terminal in one workspace.</p></div></div>
           <div className="embedded-terminal">
             <div className="embedded-terminal-title"><div className="window-dots"><i/><i/><i/></div><span>student@robot-lab</span><span className="safe-label">SIMULATED</span></div>
@@ -253,7 +267,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
           <div className="terminal-command-shortcuts"><span className="eyebrow">TAP TO INSERT A COMMAND</span><div>{Array.from(new Set([step.command, 'pwd', 'ls', 'cd ..', 'ls -la'])).map((command) => <button key={command} onClick={() => setInput(command)}><code>{command}</code></button>)}</div></div>
           {history.length > 0 && <div className="terminal-recent-history"><span className="eyebrow">RECENT PRACTICE</span>{history.slice(0, 4).map((item, index) => <button key={item.command + index} onClick={() => { setInput(item.command); setResult(item); setCwd(item.cwd); }}><code>{item.command}</code><span>{item.output.split('\n')[0] || item.status}</span></button>)}</div>}
         </article>
-        <article className="panel command-check-panel">
+        <article className="panel command-check-panel lesson-stage-check">
           <div className="panel-heading"><span className="step-number purple">05</span><div><h2>Quick recall</h2><p>Can you explain it without looking?</p></div></div>
           <p>{step.id === 'pwd' ? 'Which command tells you where the terminal is currently located?' : step.id.startsWith('cd') ? 'Which part of this command specifies the destination directory?' : step.id === 'ls' || step.id === 'ls-details' ? 'Does this command change the current directory?' : 'What does this command inspect or change, and what would you check next?'}</p>
           <button className="text-button" onClick={() => setShowHints((value) => !value)}>{showHints ? 'Hide answer' : 'Reveal answer'} <ArrowRight size={14}/></button>
@@ -267,6 +281,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
         </article>
         <div className="command-bottom-navigation"><div className="lesson-navigation-label"><b>Lesson navigation</b><span>Move between topics independently of command steps.</span></div><div className="lesson-navigation-actions"><button className="button-secondary" disabled={!canGoPrevious} onClick={onPreviousLesson}><ArrowLeft size={15}/> Previous lesson</button><button className="button-primary" disabled={!canGoNext} onClick={onNextLesson}>Next lesson <ArrowRight size={15}/></button></div></div>
       </aside>
+    </div>
     </div>
   </section>;
 }

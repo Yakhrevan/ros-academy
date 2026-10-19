@@ -22,7 +22,12 @@ const FS: SimulatedFileSystem = {
   '/home/student/ros2_ws/log': [],
   '/home/student/ros2_ws/src': ['demo_robot', 'my_robot_bringup'],
   '/home/student/ros2_ws/src/demo_robot': ['package.xml', 'src', 'launch', 'config'],
+  '/home/student/ros2_ws/src/demo_robot/src': [],
+  '/home/student/ros2_ws/src/demo_robot/launch': [],
+  '/home/student/ros2_ws/src/demo_robot/config': [],
   '/home/student/ros2_ws/src/my_robot_bringup': ['package.xml', 'launch', 'config'],
+  '/home/student/ros2_ws/src/my_robot_bringup/launch': [],
+  '/home/student/ros2_ws/src/my_robot_bringup/config': [],
   '/etc': ['hostname', 'hosts', 'network'],
   '/dev': ['null', 'ttyUSB0', 'video0'],
   '/opt': ['ros'],
@@ -59,6 +64,8 @@ function directoryEntries(cwd: string, all = false): string[] {
   return all ? entries : entries.filter((entry) => !entry.startsWith('.'));
 }
 
+let previousDirectory = '/home/student';
+
 export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): TerminalResult {
   const command = raw.trim();
   if (!command) return { command, output: '', status: 'Type a command first.', cwd };
@@ -72,11 +79,16 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'echo $PATH') return { command: command, output: '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin', status: 'Printed the simulated PATH variable.', cwd };
   if (command.startsWith('echo ')) return { command, output: shellQuoteTrim(command.slice(5)), status: 'echo writes the supplied text to stdout.', cwd };
 
-  if (command === 'cd' || command === 'cd ~') return { command, output: '', status: 'Directory changed to /home/student. Successful cd normally prints no stdout.', cwd: '/home/student' };
+  if (command === 'cd' || command === 'cd ~') { previousDirectory = cwd; return { command, output: '', status: 'Directory changed to /home/student. Successful cd normally prints no stdout.', cwd: '/home/student' }; }
+  if (command === 'cd -') {
+    const next = previousDirectory && previousDirectory !== cwd ? previousDirectory : '/home/student';
+    return { command, output: next, status: 'Switched to the previous working directory. The printed path is normal for cd -.', cwd: next };
+  }
   if (command.startsWith('cd ')) {
     const target = command.slice(3).trim();
     const next = resolvePath(target, cwd);
-    if (!FS[next]) return { command, output: '', status: 'No such directory in the virtual filesystem: ' + next, cwd };
+    if (!FS[next]) return { command, output: '', status: 'No such directory in the virtual filesystem: ' + next + '. The current directory did not change; run pwd and ls to recover.', cwd };
+    previousDirectory = cwd;
     return { command, output: '', status: 'Directory changed to ' + next + '. Run pwd to verify it.', cwd: next };
   }
 
@@ -89,7 +101,6 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     return { command, output: entries.join('  ') || '(empty directory)', status: 'Listed entries in ' + cwd + '. The working directory did not change.', cwd };
   }
 
-  if (command.startsWith('cd ')) return { command, output: '', status: 'Directory command processed.', cwd };
 
   if (command === 'ls -l deploy.sh') return { command, output: '-rw-r--r-- 1 student student 128 deploy.sh', status: 'Illustrative metadata only.', cwd };
   if (command === 'chmod u+x deploy.sh') return { command, output: '', status: 'Simulated only: owner execute bit added for the lesson; no real file was modified.', cwd };

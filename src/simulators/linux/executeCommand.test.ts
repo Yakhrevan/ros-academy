@@ -127,6 +127,12 @@ describe('Linux terminal virtual filesystem and state', () => {
     expect(executeCommand('pwd', cwd, steps).output).toBe('/home/student');
   });
 
+  it('does not split semicolons or conditional operators inside quoted text', () => {
+    resetTerminalSimulator();
+    executeCommand('echo "sensor; front && rear" > /tmp/quoted-operators.txt', cwd, steps);
+    expect(executeCommand('cat /tmp/quoted-operators.txt', cwd, steps).output).toBe('sensor; front && rear\\n');
+  });
+
   it('reflects simulated process termination in later process listings', () => {
     expect(executeCommand('ps -ef', cwd, steps).output).toContain('demo_node');
     executeCommand('kill -TERM 1042', cwd, steps);

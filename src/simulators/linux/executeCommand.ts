@@ -109,6 +109,35 @@ const virtualFileContents: Record<string, string> = {
 
 const INITIAL_FILE_CONTENTS: Record<string, string> = { ...virtualFileContents };
 
+function splitShellSequence(command: string): string[] {
+  const parts: string[] = [];
+  let buffer = '';
+  let quote: "'" | '"' | null = null;
+  for (let i = 0; i < command.length; i += 1) {
+    const char = command[i];
+    if ((char === "'" || char === '"') && (!quote || quote === char)) {
+      quote = quote ? null : char;
+      buffer += char;
+      continue;
+    }
+    if (!quote && char === ';') {
+      parts.push(buffer.trim(), ';');
+      buffer = '';
+      continue;
+    }
+    const operator = command.slice(i, i + 2);
+    if (!quote && (operator === '&&' || operator === '||')) {
+      parts.push(buffer.trim(), operator);
+      buffer = '';
+      i += 1;
+      continue;
+    }
+    buffer += char;
+  }
+  if (buffer.trim()) parts.push(buffer.trim());
+  return parts.filter((part) => part.length > 0);
+}
+
 export function resetTerminalSimulator(): void {
   for (const path of Object.keys(FS)) delete FS[path];
   for (const [path, entries] of Object.entries(INITIAL_FS)) FS[path] = [...entries];
@@ -136,7 +165,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'false') return { command, output: '', status: 'Exit status 1 (simulated).', cwd };
 
   if (command.includes(';') || command.includes(' && ') || command.includes(' || ')) {
-    const parts = command.split(/(\s*&&\s*|\s*\|\|\s*|;)/).filter((part) => part.trim());
+    const parts = splitShellSequence(command);
     let currentCwd = cwd;
     let lastExitCode = 0;
     const outputs: string[] = [];

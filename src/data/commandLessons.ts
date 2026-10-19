@@ -128,7 +128,7 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         id: 'cd-into-workspace',
         title: 'Step 1 — Enter a project folder',
         command: 'cd ros2_ws',
-        purpose: 'Start from /home/student and move into the ROS 2 workspace. The same navigation pattern applies to a GUVI practice-project folder or an HCL-style engineering project workspace; the names here are examples, not company internal paths.',
+        purpose: 'Start from /home/student and move into the ROS 2 workspace. The same navigation pattern applies to a coding practice workspace or a robotics engineering project; both are fictional examples created for ROS Academy.',
         syntax: 'cd DIRECTORY',
         tokens: [
           { token: 'cd', role: 'command', meaning: 'Change the current working directory of this shell.' },

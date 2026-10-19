@@ -124,7 +124,7 @@
 .scenario-example{padding:14px;border:1px solid #dfe8f3;border-radius:10px;background:#fbfdff}
 .scenario-label{display:flex;align-items:center;gap:7px;color:#60768e;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .scenario-dot{width:8px;height:8px;border-radius:50%;background:#3684ec}
-.scenario-dot.hcl{background:#8a63d2}
+.scenario-dot.robotics{background:#8a63d2}.scenario-dot.learning{background:#278a78}
 .scenario-example h3{font-size:13px;color:#203c5b;margin:9px 0 6px}
 .scenario-example>p{font-size:10px;line-height:1.7;color:#687e95;margin:0 0 10px}
 .scenario-command{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;margin-top:6px;border:1px solid #e2eaf4;border-radius:7px;background:#fff}

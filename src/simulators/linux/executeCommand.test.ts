@@ -93,7 +93,7 @@ describe('Linux terminal virtual filesystem and state', () => {
   it('executes semicolon-separated commands in order and carries cwd forward', () => {
     const result = executeCommand('cd /tmp; pwd; echo done', cwd, steps);
     expect(result.cwd).toBe('/tmp');
-    expect(result.output).toBe('/tmp\\ndone');
+    expect(result.output).toBe('/tmp\ndone');
   });
 
   it('models true and false exit statuses without running host commands', () => {
@@ -131,6 +131,13 @@ describe('Linux terminal virtual filesystem and state', () => {
     resetTerminalSimulator();
     executeCommand('echo "sensor; front && rear" > /tmp/quoted-operators.txt', cwd, steps);
     expect(executeCommand('cat /tmp/quoted-operators.txt', cwd, steps).output).toBe('sensor; front && rear\n');
+  });
+
+  it('returns a syntax error for an unmatched quote without changing state', () => {
+    resetTerminalSimulator();
+    const result = executeCommand('echo "unfinished text', cwd, steps);
+    expect(result.status).toContain('unmatched quote');
+    expect(executeCommand('pwd', cwd, steps).output).toBe('/home/student');
   });
 
   it('reflects simulated process termination in later process listings', () => {

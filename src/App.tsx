@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Lesson } from './types/lesson';
 import { lessons, paths, phases } from './data/curriculum';
 import { getLinuxCommandOutputs } from './simulators/linux/commandOutputs';
+import { executeCommand } from './simulators/linux/executeCommand';
 import LessonCard from './components/learning/LessonCard';
 import LinuxCommandLessonPlayer from './components/learning/LinuxCommandLessonPlayer';
 import { Activity, ArrowDown, ArrowRight, Atom, BookOpen, Bot, Check, ChevronRight, CircleHelp, Code2, Cpu, Gamepad2, GitBranch, GraduationCap, Layers3, Menu, Network, Play, Radio, RotateCcw, Search, ShieldCheck, Sparkles, Terminal, Trophy, X, Zap } from 'lucide-react';
@@ -45,17 +46,14 @@ function App() {
  const toggleComplete = (id:string) => { const exists=completed.includes(id); setCompleted(prev=>exists?prev.filter(x=>x!==id):[...prev,id]); if(!exists){addXpOnce('lesson-complete:'+id,20,'Lesson completed · +20 XP');} else {notify('Lesson marked incomplete');} };
  const runCommand = (raw:string) => {
  const cmd=raw.trim(); if(!cmd)return;
- const output=getLinuxCommandOutputs(linuxPath);
- let value='';
+ const previousCwd=linuxPath;
  if(cmd==='clear'){setLinuxHistory([]);setTerm(cmd);setTermOutput('Terminal cleared.');setLinuxInput('');return;}
- if(cmd==='cd'||cmd==='cd ~'){setLinuxPath('/home/student');value='Working directory changed to /home/student';}
- else if(cmd==='cd ..'){const p=linuxPath.substring(0,linuxPath.lastIndexOf('/'));const n=p||'/';setLinuxPath(n);value='Working directory changed to '+n;}
- else if(cmd==='cd /'){setLinuxPath('/');value='Working directory changed to /';}
- else if(cmd==='cd ros2_ws'||cmd==='cd ~/ros2_ws'){const n='/home/student/ros2_ws';setLinuxPath(n);value='Working directory changed to '+n;}
- else if(cmd.startsWith('cd ')){const n=(linuxPath==='/'?'':linuxPath)+'/'+cmd.slice(3);setLinuxPath(n);value='Working directory changed to '+n;}
- else if(cmd==='echo $PWD'){value=linuxPath;} else if(cmd==='echo $HOME'){value='/home/student';} else if(cmd.startsWith('echo ')){value=cmd.slice(5).replace(/^["']|["']$/g,'');}
- else value=output[cmd]||('bash: '+cmd.split(' ')[0]+': command not found in this learning simulator. Type help.');
- setTerm(cmd);setTermOutput(value);setLinuxHistory(prev=>[...prev.slice(-19),linuxPath+'$ '+cmd+'\n'+value]);setLinuxInput('');
+ const result=executeCommand(cmd,linuxPath,[]);
+ setLinuxPath(result.cwd);
+ const value=result.output || result.status;
+ setTerm(cmd);setTermOutput(value);
+ setLinuxHistory(prev=>[...prev.slice(-19),previousCwd+'$ '+cmd+'\\n'+value]);
+ setLinuxInput('');
  }; const nav = [{id:'dashboard',label:'Dashboard',icon:Layers3},{id:'paths',label:'Learning path',icon:GitBranch},{id:'ros',label:'ROS visualizer',icon:Network},{id:'games',label:'Games & quizzes',icon:Gamepad2},{id:'projects',label:'Projects',icon:Bot}];
  const go = (id:string) => {setActive(id);setSelected(null);setMobileOpen(false);};
  const openPath = (name:string) => {setSelectedPath(name);setSelected(null);setQuizChoice(null);setActive('path-detail');setMobileOpen(false);};

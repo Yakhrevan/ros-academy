@@ -136,3 +136,38 @@
 .scenario-workflow p{font-size:10px;line-height:1.7;color:#567568;margin:5px 0 0}
 .scenario-workflow code{font:10px 'DM Mono',monospace;color:#236b50}
 @media(max-width:600px){.scenario-example{padding:11px}.scenario-command{align-items:flex-start}.scenario-command code{font-size:9px}.scenario-command button{padding:6px}}
+
+
+/* Beginner-first explanation and animated terminal walkthrough */
+.beginner-explanation{margin:16px 0;padding:16px 17px;border:1px solid #dce8f7;border-left:4px solid #397fe5;border-radius:10px;background:#f7faff}
+.beginner-explanation h4{margin:0 0 8px;color:#194d8d;font-size:13px}
+.beginner-explanation p{margin:7px 0 0;color:#4f647d;font-size:13px;line-height:1.85}
+.beginner-explanation p b{color:#243f60}
+.terminal-walkthrough{margin:16px 0 18px;padding:20px;border:1px solid #dbe6f4;border-radius:15px;background:#fff}
+.terminal-walkthrough .panel-heading{margin-bottom:14px}
+.walkthrough-screen{overflow:hidden;border:1px solid #24364d;border-radius:12px;background:#111d2e;color:#e6efff}
+.walkthrough-bar{display:flex;align-items:center;gap:10px;min-height:39px;padding:0 12px;background:#1a2a40;border-bottom:1px solid #2c405b}
+.walkthrough-bar>span:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#b7c9df;font:10px 'DM Mono',monospace}
+.walkthrough-scene-title{padding:18px 18px 5px;color:#9eb8da;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.walkthrough-command{display:flex;align-items:center;gap:10px;padding:12px 18px 6px;font:14px 'DM Mono',monospace}
+.walkthrough-command>span:first-child{color:#64d7a5}
+.walkthrough-command code{color:#fff}
+.walkthrough-cursor{width:7px;height:16px;background:#78aefb;animation:walkthrough-blink 1s steps(2,start) infinite}
+.walkthrough-screen>pre{min-height:38px;margin:0;padding:8px 18px 16px;color:#a9e5c7;font:12px/1.8 'DM Mono',monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.walkthrough-screen>pre.muted-output{color:#8ea1ba;font-style:italic}
+.walkthrough-location{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:12px 18px;border-top:1px solid #2b3e56;background:#15243a}
+.walkthrough-location span{color:#9db0c9;font-size:10px}
+.walkthrough-location code{color:#9ec5ff;font:11px 'DM Mono',monospace;overflow-wrap:anywhere}
+.walkthrough-explanation{display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:13px;border:1px solid #dce8f7;border-radius:9px;background:#f5f9ff;color:#2e6fc2}
+.walkthrough-explanation svg{flex:0 0 auto;margin-top:2px}
+.walkthrough-explanation p{margin:0;color:#405873;font-size:12px;line-height:1.85}
+.walkthrough-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.walkthrough-controls button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.walkthrough-progress{display:flex;gap:6px;margin-top:14px}
+.walkthrough-progress button{flex:1;height:5px;padding:0;border:0;border-radius:99px;background:#e2eaf4;cursor:pointer}
+.walkthrough-progress button.active{background:#347de3}
+.walkthrough-progress button.done{background:#63bda0}
+.walkthrough-disclaimer{margin:10px 0 0;color:#71839a;font-size:10px;line-height:1.7}
+@keyframes walkthrough-blink{to{visibility:hidden}}
+@media(max-width:600px){.terminal-walkthrough{padding:13px}.walkthrough-controls{display:grid;grid-template-columns:1fr}.walkthrough-controls button{width:100%}.beginner-explanation{padding:13px}.beginner-explanation p{font-size:12px}.walkthrough-command{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.walkthrough-cursor{animation:none}.command-progress-track i{transition:none}}

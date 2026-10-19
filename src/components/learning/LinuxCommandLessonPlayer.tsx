@@ -58,6 +58,8 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizPassed, setQuizPassed] = useState(false);
+  const [passedChecks, setPassedChecks] = useState<string[]>([]);
+  const [checksLoadedFor, setChecksLoadedFor] = useState('');
   const previousStepIndex = useRef(stepIndex);
 
   useEffect(() => {
@@ -77,6 +79,26 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       setProgressLoadedFor(lesson.id);
     }
   }, [lesson.id]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('ros-academy:passed-checks:' + lesson.id);
+      setPassedChecks(saved ? JSON.parse(saved) as string[] : []);
+      setChecksLoadedFor(lesson.id);
+    } catch {
+      setPassedChecks([]);
+      setChecksLoadedFor(lesson.id);
+    }
+  }, [lesson.id]);
+
+  useEffect(() => {
+    if (checksLoadedFor !== lesson.id) return;
+    try {
+      window.localStorage.setItem('ros-academy:passed-checks:' + lesson.id, JSON.stringify(passedChecks));
+    } catch {
+      // Quiz progress remains available for this session when storage is unavailable.
+    }
+  }, [passedChecks, lesson.id, checksLoadedFor]);
 
   useEffect(() => {
     if (progressLoadedFor !== lesson.id) return;
@@ -108,6 +130,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
         ? { question: 'What does ls do by itself?', options: ['Moves into the first folder', 'Lists directory entries', 'Changes file permissions'], correct: 1, explanation: 'ls lists directory entries. Options such as -l add details; -a includes hidden entries.' }
         : { question: 'What is the safest way to verify what a command did?', options: ['Assume it worked if there is no error', 'Run random commands until the output changes', 'Compare the result with the expected state and inspect it'], correct: 2, explanation: 'Compare the output and system state with your prediction; inspect before making further changes.' }) : null;
   const progress = steps.length ? ((stepIndex + 1) / steps.length) * 100 : 0;
+  const allChecksPassed = steps.length > 0 && steps.every((item) => passedChecks.includes(item.id));
   const pathParts = useMemo(() => cwd.split('/').filter(Boolean), [cwd]);
 
   useEffect(() => {
@@ -194,7 +217,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     </details>}
 
     <div className="command-progress">
-      <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')} · {completedSteps.length} COMPLETED</span><b>{step.title}</b></div>
+      <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')} · {completedSteps.length} PRACTISED · {passedChecks.length} CHECKS PASSED</span><b>{step.title}</b></div>
       <div className="command-progress-track"><i style={{ width: progress + '%' }}/></div>
       <span className="command-progress-count">{Math.round(progress)}%</span>
     </div>
@@ -313,13 +336,13 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
           {quiz && <div className="knowledge-check">
             <p className="knowledge-check-question">{quiz.question}</p>
             <div className="knowledge-check-options">{quiz.options.map((option, index) => <button type="button" key={option} disabled={quizSubmitted} className={quizSubmitted && index === quiz.correct ? 'correct' : quizSubmitted && index === quizAnswer ? 'incorrect' : quizAnswer === index ? 'selected' : ''} onClick={() => setQuizAnswer(index)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}</div>
-            {!quizSubmitted ? <button className="button-primary knowledge-check-submit" disabled={quizAnswer === null} onClick={() => { setQuizSubmitted(true); setQuizPassed(quizAnswer === quiz.correct); }}>{'Check answer'}</button> : <div className={'knowledge-check-feedback ' + (quizPassed ? 'passed' : 'retry')}><b>{quizPassed ? 'Correct — check passed' : 'Not quite — try again'}</b><p>{quiz.explanation}</p>{!quizPassed && <button className="button-secondary" onClick={() => { setQuizAnswer(null); setQuizSubmitted(false); }}>Try again</button>}</div>}
+            {!quizSubmitted ? <button className="button-primary knowledge-check-submit" disabled={quizAnswer === null} onClick={() => { setQuizSubmitted(true); setQuizPassed(quizAnswer === quiz.correct); if (quizAnswer === quiz.correct) setPassedChecks((previous) => previous.includes(step.id) ? previous : [...previous, step.id]); }}>{'Check answer'}</button> : <div className={'knowledge-check-feedback ' + (quizPassed ? 'passed' : 'retry')}><b>{quizPassed ? 'Correct — check passed' : 'Not quite — try again'}</b><p>{quiz.explanation}</p>{!quizPassed && <button className="button-secondary" onClick={() => { setQuizAnswer(null); setQuizSubmitted(false); }}>Try again</button>}</div>}
           </div>}
           <div className="command-step-navigation">
             <button className="button-secondary" disabled={stepIndex === 0} onClick={() => chooseStep(stepIndex - 1)}><ArrowLeft size={15}/> Previous command</button>
             <button className="button-primary" onClick={nextStep} disabled={stepIndex === steps.length - 1}>{stepIndex === steps.length - 1 ? 'All commands complete' : 'Next command'} {stepIndex === steps.length - 1 ? <CheckCircle2 size={15}/> : <ArrowRight size={15}/>}</button>
           </div>
-          {stepIndex === steps.length - 1 && <button className={'button-secondary full command-complete-button ' + (completed ? 'is-complete' : '')} onClick={() => onComplete(lesson.id)} disabled={!quizPassed}>{completed ? <><CheckCircle2 size={16}/> Lesson completed</> : <>Complete lesson <CheckCircle2 size={16}/></>}</button>}
+          {stepIndex === steps.length - 1 && <><p className="lesson-completion-requirement">{allChecksPassed ? 'All command knowledge checks passed. You can complete this lesson.' : `Pass every command knowledge check to complete this lesson (${passedChecks.length}/${steps.length} passed).`}</p><button className={'button-secondary full command-complete-button ' + (completed ? 'is-complete' : '')} onClick={() => onComplete(lesson.id)} disabled={!allChecksPassed}>{completed ? <><CheckCircle2 size={16}/> Lesson completed</> : <>Complete lesson <CheckCircle2 size={16}/></>}</button></>}
           <div className="step-dots" aria-label="Command steps">{steps.map((item, index) => <button key={item.id} className={index === stepIndex ? 'active' : completedSteps.includes(item.id) ? 'visited completed' : ''} aria-label={(completedSteps.includes(item.id) ? 'Completed: ' : 'Go to ') + item.title} title={(completedSteps.includes(item.id) ? 'Completed · ' : '') + item.title} onClick={() => chooseStep(index)}>{completedSteps.includes(item.id) ? '✓' : ''}</button>)}</div>
         </article>
         <div className="command-bottom-navigation"><div className="lesson-navigation-label"><b>Lesson navigation</b><span>Move between topics independently of command steps.</span></div><div className="lesson-navigation-actions"><button className="button-secondary" disabled={!canGoPrevious} onClick={onPreviousLesson}><ArrowLeft size={15}/> Previous lesson</button><button className="button-primary" disabled={!canGoNext} onClick={onNextLesson}>Next lesson <ArrowRight size={15}/></button></div></div>

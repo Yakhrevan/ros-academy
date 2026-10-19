@@ -191,7 +191,8 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
       if (recursive) {
         const prefix = path + '/';
         Object.keys(FS).filter((entry) => entry === path || entry.startsWith(prefix)).forEach((entry) => delete FS[entry]);
-      } else delete FS[path];\n      delete FILE_CONTENTS[path];
+      } else delete FS[path];
+      delete FILE_CONTENTS[path];
       FS[parent] = (FS[parent] ?? []).filter((entry) => entry !== name);
     }
     return { command, output: '', status: 'Entry removed from the virtual training filesystem only. Verify with ls.', cwd };
@@ -392,7 +393,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command.startsWith('sudo apt install ')) return { command, output: 'Simulated package installation preview; nothing was installed.', status: 'No package manager was run.', cwd };
   if (command === 'source /opt/ros/humble/setup.bash') return { command, output: '', status: 'Simulated: the lesson environment now treats ROS_DISTRO as humble; no host shell environment changed.', cwd };
   if (command === 'echo $ROS_DISTRO') return { command, output: 'humble (simulated)', status: 'Training environment only.', cwd };
-  if (command.startsWith('cat ')) { const target = command.slice(4).trim(); const path = resolvePath(shellQuoteTrim(target), cwd); if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd }; if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd }; return { command, output: FILE_CONTENTS[path] ?? '', status: 'Read virtual file contents. No host files were accessed.', cwd }; }
+
   if (command === 'getent hosts github.com') return { command, output: '140.82.112.3 github.com (illustrative)', status: 'Illustrative name-resolution result; no DNS lookup occurred.', cwd };
   if (command.startsWith('ssh ')) return { command, output: 'robot@amr:~$ (simulated remote prompt)', status: 'No network connection or authentication was attempted.', cwd };
   if (command.startsWith('ros2 ')) {

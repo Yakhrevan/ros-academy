@@ -363,3 +363,28 @@
 .file-ops-status svg{flex:0 0 auto;margin-top:2px}
 @media(max-width:760px){.file-ops-grid{grid-template-columns:1fr}}
 @media(max-width:440px){.file-operations-practice{padding:12px}.file-ops-entries{grid-template-columns:1fr}.file-ops-actions{display:grid;grid-template-columns:1fr}.file-ops-actions button{width:100%}.file-ops-workspace-heading{align-items:flex-start;flex-direction:column}}
+
+
+/* File reading and text search lesson */
+.file-reading-practice{margin:18px 0;padding:18px;border:1px solid #dbe6f4;border-radius:14px;background:#fff}
+.file-reader-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.file-reader-tabs button{padding:8px 11px;border:1px solid #d7e3f0;border-radius:8px;background:#f7faff;color:#3c5877;font-size:10px;font-weight:700;cursor:pointer}
+.file-reader-tabs button.active{border-color:#347fd3;background:#eaf4ff;color:#1e5793}
+.file-reader-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.file-reader-code,.file-reader-result{min-width:0;overflow:hidden;border:1px solid #2b4059;border-radius:9px;background:#101c2c}
+.file-reader-title,.file-reader-terminal-head{display:flex;align-items:center;gap:7px;padding:10px;background:#1b2c42;border-bottom:1px solid #2b4059;color:#b9cde4;font-size:10px}
+.file-reader-title small{margin-left:auto;color:#89a4c4;font-size:8px}
+.file-reader-code pre,.file-reader-output{margin:0;padding:12px;overflow:auto;color:#d9e7f7;font:10px/1.8 'DM Mono',monospace;white-space:pre;min-height:200px}
+.file-reader-terminal-head{justify-content:space-between;font-size:8px;letter-spacing:.06em}
+.file-reader-command{display:flex;gap:7px;padding:11px 12px;border-bottom:1px solid #2b4059;color:#8fe0b8}
+.file-reader-command code{color:#fff;font:10px/1.7 'DM Mono',monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.file-reader-search{display:flex;align-items:center;gap:7px;margin:10px;padding:8px;border:1px solid #3d5877;border-radius:7px;background:#192b41;color:#9eb7d4}
+.file-reader-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#e5efff;font-size:11px}
+.file-reader-output{min-height:150px;color:#b5ffdc;white-space:pre-wrap;overflow-wrap:anywhere}
+.file-reader-explanation{margin-top:12px;padding:12px;border:1px solid #dbe6f4;border-radius:9px;background:#f7faff}
+.file-reader-badge{display:inline-flex;padding:5px 8px;border-radius:6px;background:#eaf4ff;color:#245c98;font:10px 'DM Mono',monospace}
+.file-reader-explanation>p{margin:9px 0;color:#4d637c;font-size:11px;line-height:1.8}
+.file-reader-explanation code{color:#285b92;font-family:'DM Mono',monospace}
+.file-reader-next{display:flex;align-items:flex-start;gap:6px;margin-top:10px;color:#47745e;font-size:10px;line-height:1.7}
+.file-reader-next svg{flex:0 0 auto;margin-top:1px}
+@media(max-width:700px){.file-reader-layout{grid-template-columns:1fr}.file-reader-code pre{min-height:0;max-height:240px}.file-reader-output{min-height:100px}.file-reading-practice{padding:12px}}

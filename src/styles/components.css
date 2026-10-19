@@ -896,3 +896,21 @@
 .lesson-completion-requirement{margin:12px 0 8px;padding:10px 12px;border-radius:9px;background:#f1f6fd;color:#48627e;font-size:10px;line-height:1.65}
 .lesson-completion-requirement:has(+ .command-complete-button:disabled){border:1px solid #e0e9f5}
 .command-complete-button:disabled{opacity:.55;cursor:not-allowed}
+
+/* Course progress by learning path */
+.course-progress-section{margin:4px 0 28px}
+.course-progress-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.course-progress-card{min-width:0;padding:16px;border:1px solid #e0e9f5;border-radius:13px;background:#fff;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.course-progress-card:hover{transform:translateY(-2px);border-color:#c5d9f2;box-shadow:0 8px 22px rgba(27,76,130,.06)}
+.course-progress-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.course-progress-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#eff6ff;color:#2b72c7;font-size:20px}
+.course-progress-phase{color:#8495aa;font-size:9px;font-weight:800;letter-spacing:.1em}
+.course-progress-card h3{margin:13px 0 5px;color:#1d3a5b;font-size:13px;line-height:1.5}
+.course-progress-card>p{margin:0;color:#73869d;font-size:10px;line-height:1.6}
+.course-progress-track{height:6px;margin-top:13px;overflow:hidden;border-radius:99px;background:#edf2f8}
+.course-progress-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#3487eb,#59bda2);transition:width .25s ease}
+.course-progress-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.course-progress-card-bottom>b{color:#315e91;font-size:12px}
+.course-progress-card-bottom button{display:inline-flex;align-items:center;gap:5px;padding:5px 0;border:0;background:transparent;color:#2c70c4;font-size:10px;font-weight:750;cursor:pointer}
+@media(min-width:1050px){.course-progress-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:480px){.course-progress-grid{grid-template-columns:1fr}.course-progress-card{padding:14px}}

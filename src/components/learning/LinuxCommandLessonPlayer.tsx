@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, CornerDownRight, Play, RotateCcw, Terminal, Lightbulb, GitBranch } from 'lucide-react';
 import TerminalWalkthrough from './TerminalWalkthrough';
+import TerminalCommandAnimation from './TerminalCommandAnimation';
 import type { Lesson } from '../../types/lesson';
 import type { CommandStep } from '../../types/commandLesson';
 import { commandLessons } from '../../data/commandLessons';
@@ -116,6 +117,8 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       <div className="command-progress-track"><i style={{ width: progress + '%' }}/></div>
       <span className="command-progress-count">{Math.round(progress)}%</span>
     </div>
+
+    <TerminalCommandAnimation key={step.id} command={step.command} output={step.expectedOutput} cwd={cwd} title={step.title} />
 
     <div className="command-learning-layout">
       <div className="command-learning-main">

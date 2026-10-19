@@ -550,3 +550,19 @@
 .startup-deep-dive ol{padding-left:20px}
 .startup-deep-dive li{padding-left:3px;margin:4px 0}
 @media(max-width:600px){.startup-concept-grid{grid-template-columns:1fr}.startup-deep-dive h3{font-size:13px}.startup-matrix>div{min-width:560px}}
+
+
+/* Interactive Bash startup decision tree */
+.startup-decision-tree{display:grid;gap:10px;margin:14px 0;padding:14px;border:1px solid #dbe6f4;border-radius:10px;background:#fff}
+.startup-decision-tree h3{margin:0;color:#203d5d;font-size:14px}
+.startup-decision-tree>p{margin:0;color:#506780;font-size:11px;line-height:1.8}
+.startup-decision-questions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.startup-decision-questions label{display:grid;align-content:start;gap:7px;color:#385775;font-size:10px;font-weight:700;line-height:1.6}
+.startup-decision-questions select{width:100%;min-width:0;padding:9px;border:1px solid #cbd9e9;border-radius:7px;background:#f8fbff;color:#294768;font-size:10px}
+.startup-decision-result{padding:12px;border:1px solid #b9d6f2;border-radius:8px;background:#f2f8ff}
+.startup-decision-result>b{color:#245c98;font-size:12px}
+.startup-decision-result ol{padding-left:20px}
+.startup-decision-result li{margin:7px 0;color:#506780;font-size:10px;line-height:1.8}
+.startup-decision-result code{color:#285b92;font-family:'DM Mono',monospace;overflow-wrap:anywhere}
+.startup-decision-result p{margin:9px 0 0;padding-top:9px;border-top:1px solid #d6e6f6;color:#506780;font-size:10px;line-height:1.8}
+@media(max-width:620px){.startup-decision-tree{padding:11px}.startup-decision-questions{grid-template-columns:1fr}}

@@ -39,7 +39,8 @@ function App() {
  const [quizChoice,setQuizChoice] = useState<number | null>(null);
  const [completed,setCompleted] = useState<string[]>([]);
  const [xp,setXp] = useState(0);
- const [showDds,setShowDds] = useState(false);\n const [linuxPath,setLinuxPath] = useState('/home/student');
+ const [showDds,setShowDds] = useState(false);
+ const [linuxPath,setLinuxPath] = useState('/home/student');
  const [linuxInput,setLinuxInput] = useState('pwd');
  const [linuxHistory,setLinuxHistory] = useState<string[]>([]);
  const [mobileOpen,setMobileOpen] = useState(false);

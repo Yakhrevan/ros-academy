@@ -11,6 +11,7 @@ export default function TerminalCommandAnimation({ command, output, cwd, title }
   const timer = useRef<number | undefined>(undefined);
   const isCd = /^cd(?:\s|$)/.test(command.trim());
   const isLs = /^ls(?:\s|$)/.test(command.trim());
+  const isLongListing = isLs && (/(?:^|\s)-[^\s]*l/.test(command.trim()) || command.trim().includes('--long'));
   const listedEntries: string[] = output.split(/\s+/).filter(Boolean);
 
   const resolveDirectory = () => {

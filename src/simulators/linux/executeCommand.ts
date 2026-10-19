@@ -98,6 +98,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'cd' || command === 'cd ~') { previousDirectory = cwd; return { command, output: '', status: 'Directory changed to /home/student. Successful cd normally prints no stdout.', cwd: '/home/student' }; }
   if (command === 'cd -') {
     const next = previousDirectory && previousDirectory !== cwd ? previousDirectory : '/home/student';
+    previousDirectory = cwd;
     return { command, output: next, status: 'Switched to the previous working directory. The printed path is normal for cd -.', cwd: next };
   }
   if (command.startsWith('cd ')) {
@@ -138,6 +139,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
       if (!FS[parent]) return { command, output: '', status: 'touch: parent directory does not exist: ' + parent, cwd };
       if (FS[path]) return { command, output: '', status: 'touch: this training simulator only creates new sample files; entry already exists: ' + path, cwd };
       FS[path] = [];
+      virtualFileContents[path] = '';
       (FS[parent] ??= []).push(name);
     }
     return { command, output: '', status: 'Empty file created in the virtual training filesystem. Run ls to verify.', cwd };
@@ -158,9 +160,11 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     if (!FS[finalParent]) return { command, output: '', status: operation + ': destination parent does not exist: ' + finalParent, cwd };
     if (FS[finalPath] || FS[finalParent].includes(finalName)) return { command, output: '', status: operation + ': destination already exists: ' + finalPath, cwd };
     FS[finalPath] = [...(FS[source] ?? [])];
+    if (Object.prototype.hasOwnProperty.call(virtualFileContents, source)) virtualFileContents[finalPath] = virtualFileContents[source];
     FS[finalParent].push(finalName);
     if (operation === 'mv') {
       delete FS[source];
+      delete virtualFileContents[source];
       FS[sourceParent] = FS[sourceParent].filter((entry) => entry !== sourceName);
     }
     return { command, output: '', status: operation === 'cp' ? 'Copied the entry in the virtual training filesystem.' : 'Moved/renamed the entry in the virtual training filesystem.', cwd };
@@ -179,7 +183,8 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
       if (recursive) {
         const prefix = path + '/';
         Object.keys(FS).filter((entry) => entry === path || entry.startsWith(prefix)).forEach((entry) => delete FS[entry]);
-      } else delete FS[path];
+        Object.keys(virtualFileContents).filter((entry) => entry === path || entry.startsWith(prefix)).forEach((entry) => delete virtualFileContents[entry]);
+      } else { delete FS[path]; delete virtualFileContents[path]; }
       FS[parent] = (FS[parent] ?? []).filter((entry) => entry !== name);
     }
     return { command, output: '', status: 'Entry removed from the virtual training filesystem only. Verify with ls.', cwd };

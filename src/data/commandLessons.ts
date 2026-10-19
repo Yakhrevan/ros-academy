@@ -282,7 +282,7 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
           'From /home/student/ros2_ws/src, the first .. resolves to /home/student/ros2_ws; the second would move to /home/student if you ran it from src.',
           'For a predictable demonstration, check pwd before and after. The exact destination depends on your starting location.'
         ],
-        expectedOutput: 'From /home/student/ros2_ws/src/demo_robot: /home/student/ros2_ws/src\nFrom /home/student/ros2_ws/src: /home/student',
+        expectedOutput: 'From /home/student/ros2_ws/src/demo_robot: /home/student/ros2_ws\nFrom /home/student/ros2_ws/src: /home/student',
         outputMeaning: [
           'Every .. represents one parent step.',
           'Count the parent components and consider your starting path before running the command.'

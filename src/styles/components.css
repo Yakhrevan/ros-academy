@@ -930,3 +930,11 @@
 .lesson-completion-summary-next>b{color:#244d3c;font-size:12px;line-height:1.6}
 .lesson-completion-summary-next .button-primary{justify-self:start}
 @media(max-width:480px){.lesson-completion-summary{padding:12px;gap:9px}.lesson-completion-summary-stats{gap:7px}.lesson-completion-summary-stats>div{padding:9px}}
+
+/* Unified practice and assessment dashboard totals */
+.dashboard-activity-summary{display:grid;grid-template-columns:1fr 1fr minmax(150px,1.5fr);gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid #e0e9f5}
+.dashboard-activity-summary>div{display:grid;align-content:start;gap:4px;padding:11px;border:1px solid #e1eaf5;border-radius:10px;background:#fff}
+.dashboard-activity-summary>div>b{color:#1e4c7d;font-size:20px;letter-spacing:-.03em}
+.dashboard-activity-summary>div>small{color:#71839a;font-size:10px}
+.dashboard-activity-summary>p{align-self:center;margin:0;color:#72869c;font-size:10px;line-height:1.7}
+@media(max-width:700px){.dashboard-activity-summary{grid-template-columns:1fr 1fr}.dashboard-activity-summary>p{grid-column:1/-1;padding:0 3px}}

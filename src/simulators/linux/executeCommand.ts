@@ -145,7 +145,54 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'echo $HOME') return { command, output: simulatedEnvironment.HOME ?? '', status: 'Expanded HOME in the current simulated shell.', cwd };
   if (command === 'echo $ROS_DISTRO') return { command, output: simulatedRosDistro, status: simulatedRosDistro ? 'ROS_DISTRO is set in the simulated shell.' : 'ROS_DISTRO is not set in this simulated shell. Source the ROS setup file to set it.', cwd };
   if (command === 'echo $PATH') return { command, output: simulatedEnvironment.PATH ?? '', status: 'Printed the simulated PATH variable.', cwd };
-  if (command.startsWith('echo ')) { const text = shellQuoteTrim(command.slice(5)).replace(/\\$([A-Za-z_][A-Za-z0-9_]*)/g, (_match, name: string) => name === 'PWD' ? cwd : name === 'ROS_DISTRO' ? simulatedRosDistro : simulatedEnvironment[name] ?? ''); return { command, output: text, status: 'Expanded known variables and wrote text to stdout in the simulated shell.', cwd }; }
+  const redirectMatch = command.match(/^(.+?)\s*(>>|>)\s*(.+)$/);
+  if (redirectMatch) {
+    const left = redirectMatch[1].trim();
+    const append = redirectMatch[2] === '>>';
+    const target = redirectMatch[3].trim().replace(/^['"]|['"]$/g, '');
+    const path = resolvePath(target, cwd);
+    const parent = path.slice(0, path.lastIndexOf('/')) || '/';
+    const name = path.split('/').pop() || '';
+    if (!isDirectory(parent)) return { command, output: '', status: 'bash: cannot redirect to a path whose parent directory does not exist: ' + parent, cwd };
+    if (isDirectory(path)) return { command, output: '', status: 'bash: cannot overwrite a directory: ' + path, cwd };
+    let content = '';
+    if (left.startsWith('echo ')) content = left.slice(5).replace(/^['"]|['"]$/g, '') + '\n';
+    else if (left.startsWith('printf ')) {
+      const quoted = left.slice(7).trim().replace(/^['"]|['"]$/g, '');
+      content = quoted.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+    } else return { command, output: '', status: 'This simulator supports redirection with echo and printf only. Example: echo hello > notes.txt', cwd };
+    if (!pathExists(path) && !FS[parent].includes(name)) FS[parent].push(name);
+    virtualFileContents[path] = append ? (virtualFileContents[path] || '') + content : content;
+    return { command, output: '', status: (append ? 'Appended to ' : 'Wrote ') + path + ' in the virtual filesystem only. Read it with cat to verify.', cwd };
+  }
+
+  // Small, deterministic pipeline support for grep over virtual text. No subprocesses are launched.
+  if (command.includes('|')) {
+    const parts = command.split('|').map((part) => part.trim());
+    if (parts.length !== 2 || !parts[1].startsWith('grep ')) return { command, output: '', status: 'This virtual terminal supports simple pipelines of the form cat FILE | grep PATTERN or printf TEXT | grep PATTERN.', cwd };
+    const source = parts[0];
+    const filter = parts[1].slice(5).trim().split(/\s+/);
+    const pattern = (filter[0] || '').replace(/^['"]|['"]$/g, '');
+    if (!pattern) return { command, output: '', status: 'Usage: cat FILE | grep PATTERN', cwd };
+    let input = '';
+    if (source.startsWith('cat ')) {
+      const path = resolvePath(source.slice(4).trim().replace(/^['\"]|['\"]$/g, ''), cwd);
+      if (!pathExists(path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd };
+      if (isDirectory(path)) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd };
+      input = virtualFileContents[path] ?? '';
+    } else if (source.startsWith('printf ')) {
+      input = source.slice(7).trim().replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+    } else if (source.startsWith('echo ')) {
+      input = shellQuoteTrim(source.slice(5)) + '\n';
+    } else {
+      return { command, output: '', status: 'Unsupported pipeline source. Try cat FILE or printf TEXT before the pipe.', cwd };
+    }
+    const matches = input.split(/\r?\n/).filter((line) => line.includes(pattern));
+    return { command, output: matches.join('\n'), status: matches.length ? 'Filtered simulated pipeline output; no host commands were executed.' : 'Pipeline completed with no matching lines.', cwd };
+  }
+
+
+  if (command.startsWith('echo ')) { const text = shellQuoteTrim(command.slice(5)).replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (_match, name: string) => name === 'PWD' ? cwd : name === 'ROS_DISTRO' ? simulatedRosDistro : simulatedEnvironment[name] ?? ''); return { command, output: text, status: 'Expanded known variables and wrote text to stdout in the simulated shell.', cwd }; }
 
   if (command === 'cd' || command === 'cd ~') { previousDirectory = cwd; return { command, output: '', status: 'Directory changed to /home/student. Successful cd normally prints no stdout.', cwd: '/home/student' }; }
   if (command === 'cd -') {
@@ -156,7 +203,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command.startsWith('cd ')) {
     const target = command.slice(3).trim();
     const next = resolvePath(target, cwd);
-    if (!FS[next]) return { command, output: '', status: 'No such directory in the virtual filesystem: ' + next + '. The current directory did not change; run pwd and ls to recover.', cwd };
+    if (!isDirectory(next)) return { command, output: '', status: 'No such directory in the virtual filesystem: ' + next + '. The current directory did not change; run pwd and ls to recover.', cwd };
     previousDirectory = cwd;
     return { command, output: '', status: 'Directory changed to ' + next + '. Run pwd to verify it.', cwd: next };
   }
@@ -321,52 +368,6 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command.startsWith('sudo apt install ')) return { command, output: 'Simulated package installation preview; nothing was installed.', status: 'No package manager was run.', cwd };
   if (command === 'source /opt/ros/humble/setup.bash') { simulatedRosDistro = 'humble'; return { command, output: '', status: 'Simulated ROS 2 Humble environment loaded. Run echo $ROS_DISTRO to verify; your host shell is unchanged.', cwd }; }
   if (command === 'echo $ROS_DISTRO') return { command, output: simulatedRosDistro, status: simulatedRosDistro ? 'Training environment only.' : 'ROS_DISTRO is not set in this simulated shell.', cwd };
-  const redirectMatch = command.match(/^(.+?)\s*(>>|>)\s*(.+)$/);
-  if (redirectMatch) {
-    const left = redirectMatch[1].trim();
-    const append = redirectMatch[2] === '>>';
-    const target = redirectMatch[3].trim().replace(/^['"]|['"]$/g, '');
-    const path = resolvePath(target, cwd);
-    const parent = path.slice(0, path.lastIndexOf('/')) || '/';
-    const name = path.split('/').pop() || '';
-    if (!isDirectory(parent)) return { command, output: '', status: 'bash: cannot redirect to a path whose parent directory does not exist: ' + parent, cwd };
-    if (isDirectory(path)) return { command, output: '', status: 'bash: cannot overwrite a directory: ' + path, cwd };
-    let content = '';
-    if (left.startsWith('echo ')) content = left.slice(5).replace(/^['"]|['"]$/g, '') + '\n';
-    else if (left.startsWith('printf ')) {
-      const quoted = left.slice(7).trim().replace(/^['"]|['"]$/g, '');
-      content = quoted.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
-    } else return { command, output: '', status: 'This simulator supports redirection with echo and printf only. Example: echo hello > notes.txt', cwd };
-    if (!pathExists(path) && !FS[parent].includes(name)) FS[parent].push(name);
-    virtualFileContents[path] = append ? (virtualFileContents[path] || '') + content : content;
-    return { command, output: '', status: (append ? 'Appended to ' : 'Wrote ') + path + ' in the virtual filesystem only. Read it with cat to verify.', cwd };
-  }
-
-  // Small, deterministic pipeline support for grep over virtual text. No subprocesses are launched.
-  if (command.includes('|')) {
-    const parts = command.split('|').map((part) => part.trim());
-    if (parts.length !== 2 || !parts[1].startsWith('grep ')) return { command, output: '', status: 'This virtual terminal supports simple pipelines of the form cat FILE | grep PATTERN or printf TEXT | grep PATTERN.', cwd };
-    const source = parts[0];
-    const filter = parts[1].slice(5).trim().split(/\s+/);
-    const pattern = (filter[0] || '').replace(/^['"]|['"]$/g, '');
-    if (!pattern) return { command, output: '', status: 'Usage: cat FILE | grep PATTERN', cwd };
-    let input = '';
-    if (source.startsWith('cat ')) {
-      const path = resolvePath(source.slice(4).trim().replace(/^['\"]|['\"]$/g, ''), cwd);
-      if (!pathExists(path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd };
-      if (isDirectory(path)) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd };
-      input = virtualFileContents[path] ?? '';
-    } else if (source.startsWith('printf ')) {
-      input = source.slice(7).trim().replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
-    } else if (source.startsWith('echo ')) {
-      input = shellQuoteTrim(source.slice(5)) + '\n';
-    } else {
-      return { command, output: '', status: 'Unsupported pipeline source. Try cat FILE or printf TEXT before the pipe.', cwd };
-    }
-    const matches = input.split(/\r?\n/).filter((line) => line.includes(pattern));
-    return { command, output: matches.join('\n'), status: matches.length ? 'Filtered simulated pipeline output; no host commands were executed.' : 'Pipeline completed with no matching lines.', cwd };
-  }
-
   if (command.startsWith('grep ')) {
     const args = command.slice(5).trim().split(/\s+/);
     if (args.length < 2) return { command, output: '', status: 'Usage: grep PATTERN FILE', cwd };

@@ -33,7 +33,7 @@ describe('Linux terminal virtual filesystem and state', () => {
 
     const result = executeCommand('cat /tmp/ros-academy-pipeline-test.txt | grep wheel', cwd, steps);
     expect(result.output).toBe('wheel');
-    expect(result.status).toContain('Filtered simulated pipeline');
+    expect(result.status).toContain('Filtered simulated pipeline output');
   });
 
   it('preserves file contents through cp, mv and rm', () => {

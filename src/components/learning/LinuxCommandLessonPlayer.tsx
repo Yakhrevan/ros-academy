@@ -9,6 +9,7 @@ import PipelinePractice from './PipelinePractice';
 import ProcessManagementPractice from './ProcessManagementPractice';
 import EnvironmentVariablesPractice from './EnvironmentVariablesPractice';
 import ShellStartupPractice from './ShellStartupPractice';
+import PackageSystemInspectionPractice from './PackageSystemInspectionPractice';
 import type { Lesson } from '../../types/lesson';
 import type { CommandStep } from '../../types/commandLesson';
 import { commandLessons } from '../../data/commandLessons';
@@ -125,6 +126,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     {lesson.id === 'linux-files' && <ProcessManagementPractice />}
     {lesson.id === 'linux-files' && <EnvironmentVariablesPractice />}
     {lesson.id === 'linux-files' && <ShellStartupPractice />}
+    {lesson.id === 'linux-files' && <PackageSystemInspectionPractice />}
 
     <div className="command-progress">
       <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')}</span><b>{step.title}</b></div>

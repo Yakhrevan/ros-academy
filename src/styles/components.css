@@ -102,6 +102,23 @@
 .command-check-panel>p{font-size:11px;line-height:1.7;color:#5d7289}
 .command-check-panel .text-button{display:flex;align-items:center;gap:5px;font-size:10px}
 .command-check-panel .explanation-box{margin-top:10px}
+.knowledge-check{display:grid;gap:12px;margin:12px 0 16px}
+.knowledge-check-question{margin:0;color:#203b59;font-size:13px;line-height:1.65;font-weight:750}
+.knowledge-check-options{display:grid;gap:8px}
+.knowledge-check-options button{display:flex;align-items:flex-start;gap:10px;width:100%;padding:11px;border:1px solid #dce6f2;border-radius:9px;background:#fff;color:#425b76;text-align:left;font-size:11px;line-height:1.6;cursor:pointer}
+.knowledge-check-options button>span{display:grid;place-items:center;flex:0 0 22px;height:22px;border:1px solid #d9e5f3;border-radius:6px;background:#f5f8fc;color:#466583;font-size:10px;font-weight:800}
+.knowledge-check-options button.selected{border-color:#78a9ed;background:#f0f6ff;color:#1d5fb4}
+.knowledge-check-options button.correct{border-color:#9bd8ba;background:#effaf4;color:#176b4b}
+.knowledge-check-options button.incorrect{border-color:#efb0b0;background:#fff4f4;color:#a33c3c}
+.knowledge-check-options button:disabled{cursor:default}
+.knowledge-check-submit{justify-self:start}
+.knowledge-check-feedback{padding:12px;border:1px solid #dce6f2;border-radius:9px;background:#f8fbff}
+.knowledge-check-feedback b{font-size:11px;color:#244a73}
+.knowledge-check-feedback p{margin:5px 0 0;font-size:11px;line-height:1.7;color:#5d7289}
+.knowledge-check-feedback.passed{border-color:#a9dfc5;background:#effaf4}
+.knowledge-check-feedback.passed b{color:#176b4b}
+.knowledge-check-feedback.retry{border-color:#f0d2a3;background:#fffaf0}
+.knowledge-check-feedback .button-secondary{margin-top:10px}
 .command-step-navigation{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:15px}
 .command-step-navigation button{display:flex;justify-content:center;align-items:center;gap:5px;padding:9px 6px;font-size:10px;min-width:0}
 .command-step-navigation button:disabled{opacity:.35;cursor:not-allowed}

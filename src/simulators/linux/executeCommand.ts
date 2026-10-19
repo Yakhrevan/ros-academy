@@ -102,7 +102,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'systemd-analyze blame | head') return { command, output: '4.2s NetworkManager-wait-online.service\n2.1s robot-bringup.service\n1.4s systemd-udev-settle.service (illustrative)', status: 'Illustrative services and timings.', cwd };
   if (command === 'systemctl get-default') return { command, output: 'graphical.target (illustrative)', status: 'Example default target, not queried from your computer.', cwd };
   if (command === 'systemctl --failed') return { command, output: '0 loaded units listed (illustrative)', status: 'No actual systemd manager was queried.', cwd };
-  if (command.startsWith('systemctl status ')) return { command, output: command.split(' ').at(-1) + ' - service (simulated status)', status: 'Simulated service state only.', cwd };
+  if (command.startsWith('systemctl status ')) return { command, output: command.split(' ').slice(-1)[0] + ' - service (simulated status)', status: 'Simulated service state only.', cwd };
   if (command.startsWith('journalctl')) return { command, output: 'Oct 19 08:01:03 robot-lab systemd[1]: illustrative service message', status: 'Illustrative journal line; no system logs were read.', cwd };
   if (command.startsWith('systemd-analyze blame')) return { command, output: '2.1s robot-bringup.service\n1.4s systemd-udev-settle.service (illustrative)', status: 'Illustrative boot timing.', cwd };
   if (command === 'ip addr' || command === 'ip address show') return { command, output: 'lo: 127.0.0.1/8\nwlan0: 192.168.1.42/24 (illustrative)', status: 'Example interfaces; no network state was queried.', cwd };

@@ -152,18 +152,18 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
         {lesson.id === 'linux-files' && <article className="panel command-scenario-panel">
           <div className="panel-heading"><span className="step-number">REAL</span><div><h2>Practice with project-style examples</h2><p>Use the same navigation skills with two different folder structures.</p></div></div>
           <div className="scenario-example">
-            <div className="scenario-label"><span className="scenario-dot guvi"/>Learning / practice project</div>
-            <h3>GUVI-style coding practice</h3>
-            <p>Imagine your practice files are stored under a project folder in your home directory. These names are fictional training examples, not actual GUVI paths.</p>
-            <div className="scenario-command"><code>cd ~/projects/guvi-practice</code><button onClick={() => setInput('cd ~/projects/guvi-practice')}>Use command</button></div>
+            <div className="scenario-label"><span className="scenario-dot learning"/>Learning / practice project</div>
+            <h3>Coding practice workspace</h3>
+            <p>Imagine your practice files are stored under a project folder in your home directory. This is an original fictional training workspace created for ROS Academy.</p>
+            <div className="scenario-command"><code>cd ~/projects/coding-practice-lab</code><button onClick={() => setInput('cd ~/projects/coding-practice-lab')}>Use command</button></div>
             <div className="scenario-command"><code>ls</code><button onClick={() => setInput('ls')}>Use command</button></div>
             <div className="scenario-command"><code>cd ..</code><button onClick={() => setInput('cd ..')}>Use command</button></div>
             <p className="scenario-hint">Goal: enter the practice folder, inspect its contents, then return to projects.</p>
           </div>
           <div className="scenario-example">
-            <div className="scenario-label"><span className="scenario-dot hcl"/>Engineering / robotics project</div>
-            <h3>Enterprise AMR project (HCL-style example)</h3>
-            <p>Imagine a robotics repository with source code, configuration and launch folders. This is a generic training scenario, not HCL’s internal structure.</p>
+            <div className="scenario-label"><span className="scenario-dot robotics"/>Engineering / robotics project</div>
+            <h3>Autonomous mobile robot (AMR) project</h3>
+            <p>Imagine a robotics repository with source code, configuration and launch folders. This is an original fictional robotics project created for ROS Academy.</p>
             <div className="scenario-command"><code>cd ~/projects/enterprise-amr-demo</code><button onClick={() => setInput('cd ~/projects/enterprise-amr-demo')}>Use command</button></div>
             <div className="scenario-command"><code>cd src</code><button onClick={() => setInput('cd src')}>Use command</button></div>
             <div className="scenario-command"><code>cd -</code><button onClick={() => setInput('cd -')}>Use command</button></div>

@@ -324,3 +324,42 @@
 .path-practice-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .path-practice-controls button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
 @media(max-width:520px){.path-prediction-practice{padding:13px}.path-practice-controls{display:grid;grid-template-columns:1fr}.path-practice-controls button{width:100%}}
+
+
+/* Interactive safe Linux file operations workspace */
+.file-operations-practice{margin:18px 0;padding:18px;border:1px solid #dbe6f4;border-radius:14px;background:#fff}
+.file-ops-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:14px;margin-top:14px}
+.file-ops-terminal{overflow:hidden;border:1px solid #293e58;border-radius:10px;background:#101c2c;color:#e5efff;min-width:0}
+.file-ops-terminal-bar{display:flex;align-items:center;gap:5px;padding:10px;background:#1b2c42;border-bottom:1px solid #2b4059}
+.file-ops-dot{width:7px;height:7px;border-radius:50%;background:#7188a4}
+.file-ops-terminal-bar>b{margin-left:7px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#b7c9df;font:9px 'DM Mono',monospace}
+.file-ops-terminal-body{min-height:130px;padding:13px;overflow-wrap:anywhere}
+.file-ops-prompt{display:block;color:#75d9ae;font:10px/1.8 'DM Mono',monospace}
+.file-ops-terminal-body>code{display:block;margin-top:4px;color:#fff;font:12px/1.8 'DM Mono',monospace}
+.file-ops-history{margin-top:7px;padding-top:7px;border-top:1px solid #2b4059;color:#92a9c4;font:10px/1.7 'DM Mono',monospace}
+.file-ops-message{margin:12px 0 0;padding:8px;border-left:3px solid #6d9fe2;background:#192c45;color:#c5d9f3;font-size:10px;line-height:1.7}
+.file-ops-explanation{padding:13px;border:1px solid #dbe6f4;border-radius:10px;background:#f8fbff;min-width:0}
+.file-ops-kicker{color:#4777ad;font-size:9px;font-weight:800;letter-spacing:.1em}
+.file-ops-explanation h3{margin:7px 0;color:#1d3552;font-size:15px}
+.file-ops-explanation>p{color:#60738a;font-size:11px;line-height:1.75}
+.file-ops-syntax{display:grid;gap:5px;margin:10px 0;padding:9px;border-radius:7px;background:#13243a}
+.file-ops-syntax>span{color:#91b0d2;font-size:9px;text-transform:uppercase}
+.file-ops-syntax>code{color:#b5ffdc;font:11px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.file-ops-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.file-ops-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px}
+.file-ops-warning{display:flex;align-items:flex-start;gap:7px;width:100%;padding:9px;border:1px solid #e6c58c;border-radius:7px;background:#fff7e8;color:#785a24;font-size:10px;line-height:1.7}
+.file-ops-warning svg{flex:0 0 auto;margin-top:2px}
+.file-ops-workspace-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:17px}
+.file-ops-workspace-heading h3{margin:0;color:#203a58;font-size:13px}
+.file-ops-workspace-heading p{margin:4px 0 0;color:#71839a;font-size:10px}
+.file-ops-workspace-heading>span{display:flex;align-items:center;gap:5px;color:#34775d;font-size:9px;font-weight:700}
+.file-ops-entries{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.file-ops-entry{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:5px 8px;padding:10px;border:1px solid #dce7f3;border-radius:8px;background:#f8fbff;min-width:0}
+.file-ops-entry svg{grid-row:span 2;color:#548bd0}
+.file-ops-entry.file svg{color:#8093aa}
+.file-ops-entry code{color:#294768;font:11px/1.5 'DM Mono',monospace;overflow-wrap:anywhere}
+.file-ops-entry>span{color:#8292a6;font-size:9px}
+.file-ops-status{display:flex;align-items:flex-start;gap:7px;margin-top:10px;padding:9px;border:1px solid #b9e0cb;border-radius:7px;background:#f0fbf5;color:#2f6d50;font-size:10px;line-height:1.7}
+.file-ops-status svg{flex:0 0 auto;margin-top:2px}
+@media(max-width:760px){.file-ops-grid{grid-template-columns:1fr}}
+@media(max-width:440px){.file-operations-practice{padding:12px}.file-ops-entries{grid-template-columns:1fr}.file-ops-actions{display:grid;grid-template-columns:1fr}.file-ops-actions button{width:100%}.file-ops-workspace-heading{align-items:flex-start;flex-direction:column}}

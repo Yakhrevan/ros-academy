@@ -73,6 +73,7 @@ function directoryEntries(cwd: string, all = false): string[] {
 
 let previousDirectory = '/home/student';
 let simulatedRosDistro = '';
+let simulatedDemoNodeRunning = true;
 const simulatedEnvironment: Record<string, string> = { HOME: '/home/student', PATH: '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin' };
 const virtualFileContents: Record<string, string> = {
   '/home/student/Documents/notes.txt': 'Remember to source the ROS 2 setup file before using ROS CLI tools.\n',
@@ -241,8 +242,9 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
 
   if (command === 'ls -l deploy.sh') return { command, output: '-rw-r--r-- 1 student student 128 deploy.sh', status: 'Illustrative metadata only.', cwd };
   if (command === 'chmod u+x deploy.sh') return { command, output: '', status: 'Simulated only: owner execute bit added for the lesson; no real file was modified.', cwd };
-  if (command === 'ps -ef' || command === 'ps aux') return { command, output: 'UID  PID  COMMAND\nroot  1    systemd\nstudent 721 bash\nstudent 1042 demo_node (simulated)', status: 'Process listing is fabricated for training; no host processes were inspected.', cwd };
-  if (command === 'kill -TERM 1042' || command === 'kill -TERM <pid>') return { command, output: '', status: 'Simulated SIGTERM request for demo_node. No real process was signalled.', cwd };
+  if (command === 'ps -ef' || command === 'ps aux') { const rows = ['UID  PID  COMMAND', 'root  1    systemd', 'student 721 bash']; if (simulatedDemoNodeRunning) rows.push('student 1042 demo_node (simulated)'); return { command, output: rows.join('\n'), status: 'Process listing reflects simulated training state; no host processes were inspected.', cwd }; }
+  if (command === 'kill -TERM 1042') { if (!simulatedDemoNodeRunning) return { command, output: '', status: 'kill: (1042): process not found in the simulated process table.', cwd }; simulatedDemoNodeRunning = false; return { command, output: '', status: 'Simulated SIGTERM delivered to demo_node (PID 1042). Run ps -ef to verify it is no longer listed. No real process was signalled.', cwd }; }
+  if (command === 'kill -TERM <pid>') return { command, output: '', status: 'Replace <pid> with a numeric PID, for example: kill -TERM 1042. This only affects the virtual process table.', cwd };
   if (command === 'free -h') return { command, output: 'Mem: 7.7Gi total  1.8Gi used  4.1Gi free (simulated)', status: 'Invented memory values; no machine metrics were queried.', cwd };
   if (command === 'uptime') return { command, output: '08:12:34 up 3 days, 4:21, 2 users, load average: 0.32, 0.27, 0.21 (illustrative)', status: 'Illustrative uptime/load values, not measurements from your device.', cwd };
   if (command === 'who -b') return { command, output: 'system boot  2026-10-16 03:51 (illustrative)', status: 'Illustrative boot timestamp.', cwd };

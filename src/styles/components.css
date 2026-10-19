@@ -116,3 +116,23 @@
 .command-bottom-navigation button:disabled{opacity:.35;cursor:not-allowed}
 @media(max-width:900px){.command-learning-layout{grid-template-columns:minmax(0,1fr)}.command-practice-column{grid-template-columns:minmax(0,1fr)}.command-hero-mark{min-width:95px}.command-lesson-hero{padding:21px}}
 @media(max-width:600px){.command-lesson-hero{padding:17px;gap:10px;align-items:flex-start}.command-hero-mark{min-width:65px;min-height:65px;border-radius:10px}.command-hero-mark svg{width:24px}.command-hero-mark span{font-size:6px;text-align:center}.command-lesson-hero h1{font-size:25px}.command-lesson-hero p{font-size:11px}.command-progress{grid-template-columns:minmax(0,1fr) 68px 30px;gap:8px;padding:12px}.command-progress>div:first-child b{font-size:10px}.command-learning-layout .panel{padding:14px}.token-row{grid-template-columns:minmax(72px,auto) minmax(0,1fr);gap:8px}.token-row>code{font-size:10px}.filesystem-top{flex-wrap:wrap}.filesystem-top>b{width:100%;text-align:left;margin-left:24px}.command-step-navigation{grid-template-columns:1fr}.command-bottom-navigation button{padding:9px 10px}.embedded-terminal-form .button-primary{padding:8px}.command-lesson-hero .hero-meta{flex-wrap:wrap}}
+
+
+/* Guided real-world practice scenarios */
+.command-scenario-panel{display:grid;gap:13px}
+.command-scenario-panel>.panel-heading{margin-bottom:0}
+.scenario-example{padding:14px;border:1px solid #dfe8f3;border-radius:10px;background:#fbfdff}
+.scenario-label{display:flex;align-items:center;gap:7px;color:#60768e;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.scenario-dot{width:8px;height:8px;border-radius:50%;background:#3684ec}
+.scenario-dot.hcl{background:#8a63d2}
+.scenario-example h3{font-size:13px;color:#203c5b;margin:9px 0 6px}
+.scenario-example>p{font-size:10px;line-height:1.7;color:#687e95;margin:0 0 10px}
+.scenario-command{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;margin-top:6px;border:1px solid #e2eaf4;border-radius:7px;background:#fff}
+.scenario-command code{font:10px/1.6 'DM Mono',monospace;color:#2166bb;overflow-wrap:anywhere;min-width:0}
+.scenario-command button{flex:0 0 auto;border:1px solid #d8e6f7;border-radius:6px;background:#f2f7ff;color:#2369bf;font-size:9px;padding:6px 8px}
+.scenario-example .scenario-hint{margin:9px 0 0;color:#667b91}
+.scenario-workflow{padding:12px;border-radius:9px;background:#eef8f3;border:1px solid #d8eee3}
+.scenario-workflow b{font-size:10px;color:#247a57}
+.scenario-workflow p{font-size:10px;line-height:1.7;color:#567568;margin:5px 0 0}
+.scenario-workflow code{font:10px 'DM Mono',monospace;color:#236b50}
+@media(max-width:600px){.scenario-example{padding:11px}.scenario-command{align-items:flex-start}.scenario-command code{font-size:9px}.scenario-command button{padding:6px}}

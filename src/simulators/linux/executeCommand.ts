@@ -115,7 +115,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'false') return { command, output: '', status: 'Exit status 1 (simulated).', cwd };
 
   if (command.includes(';') || command.includes(' && ') || command.includes(' || ')) {
-    const parts = command.split(/(\\s*&&\\s*|\\s*\\|\\|\\s*|;)/).filter((part) => part.trim());
+    const parts = command.split(/(\s*&&\s*|\s*\|\|\s*|;)/).filter((part) => part.trim());
     let currentCwd = cwd;
     let lastExitCode = 0;
     const outputs: string[] = [];

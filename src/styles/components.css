@@ -188,3 +188,29 @@
 
 /* Keep the active command description visible after Next command */
 #command-step-description{scroll-margin-top:18px}
+
+
+/* Per-command terminal animation: type, submit, then highlight output */
+.per-command-animation{margin:16px 0;padding:20px;border:1px solid #dbe6f4;border-radius:15px;background:#fff}
+.per-command-animation .panel-heading{margin-bottom:14px}
+.command-animation-window{overflow:hidden;border:1px solid #23374f;border-radius:12px;background:#101c2c;color:#e5efff}
+.command-animation-titlebar{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 12px;border-bottom:1px solid #2b4059;background:#192a40}
+.command-animation-titlebar>span:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#b7c9df;font:10px 'DM Mono',monospace}
+.command-animation-body{min-height:190px;padding:16px}
+.command-animation-caption{margin-bottom:18px;color:#8faaca;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.command-animation-prompt{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;font:12px/1.8 'DM Mono',monospace;overflow-wrap:anywhere}
+.command-animation-prompt>span{color:#71d7a9}.command-animation-prompt>b{color:#9bc5ff}.command-animation-prompt>strong{color:#f2c879}.command-animation-prompt>code{color:#fff;white-space:pre-wrap;overflow-wrap:anywhere}
+.typing-caret{display:inline-block;width:7px;height:15px;background:#8ebcff;animation:walkthrough-blink 1s steps(2,start) infinite;vertical-align:middle}
+.enter-indicator{display:inline-flex;margin:12px 0 0 3px;padding:4px 8px;border:1px solid #5a4c2b;border-radius:6px;background:#30291b;color:#f2d58d;font-size:10px;animation:fade-in-result .25s ease both}
+.command-animation-result{margin-top:18px;padding:12px;border:1px solid #2b6c56;border-radius:9px;background:#132b2b;animation:fade-in-result .35s ease both}
+.command-animation-result .result-label{color:#76dbb3;font-size:9px;font-weight:800;letter-spacing:.1em}
+.command-animation-result pre{margin:9px 0;padding:10px;border-left:3px solid #65d5a8;border-radius:4px;background:#0d211f;color:#a4f0ca;font:12px/1.8 'DM Mono',monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.command-animation-result p{margin:8px 0 0;color:#b7cbbb;font-size:11px;line-height:1.7}
+.command-animation-placeholder{margin-top:18px;padding:15px;border:1px dashed #405571;border-radius:8px;color:#9eb0c7;font-size:11px;line-height:1.7}
+.command-animation-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.command-animation-controls button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.command-animation-controls button:disabled{opacity:.5;cursor:not-allowed}
+.command-animation-note{margin:10px 0 0;color:#71839a;font-size:10px;line-height:1.7}
+@keyframes fade-in-result{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.per-command-animation{padding:13px}.command-animation-controls{display:grid;grid-template-columns:1fr}.command-animation-controls button{width:100%}.command-animation-body{padding:12px;min-height:170px}}
+@media(prefers-reduced-motion:reduce){.typing-caret{animation:none}.enter-indicator,.command-animation-result{animation:none}}

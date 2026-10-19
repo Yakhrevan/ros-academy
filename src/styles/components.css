@@ -938,3 +938,8 @@
 .dashboard-activity-summary>div>small{color:#71839a;font-size:10px}
 .dashboard-activity-summary>p{align-self:center;margin:0;color:#72869c;font-size:10px;line-height:1.7}
 @media(max-width:700px){.dashboard-activity-summary{grid-template-columns:1fr 1fr}.dashboard-activity-summary>p{grid-column:1/-1;padding:0 3px}}
+
+/* Dashboard resume position details */
+.resume-position-details{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.resume-position-details>span{display:inline-flex;gap:4px;align-items:center;padding:5px 7px;border:1px solid #e0e9f5;border-radius:7px;background:#f7faff;color:#647a92;font-size:9px;line-height:1.5}
+.resume-position-details>span>b{color:#2c4e73;font-weight:800}

@@ -53,6 +53,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   const [history, setHistory] = useState<TerminalResult[]>([]);
   const [showHints, setShowHints] = useState(false);
   const [ranCurrentStep, setRanCurrentStep] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const previousStepIndex = useRef(stepIndex);
 
   useEffect(() => {
@@ -61,6 +62,23 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       document.getElementById('command-step-description')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [stepIndex]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('ros-academy:completed-commands:' + lesson.id);
+      setCompletedSteps(saved ? JSON.parse(saved) as string[] : []);
+    } catch {
+      setCompletedSteps([]);
+    }
+  }, [lesson.id]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('ros-academy:completed-commands:' + lesson.id, JSON.stringify(completedSteps));
+    } catch {
+      // Progress remains available for this session when storage is unavailable.
+    }
+  }, [completedSteps, lesson.id]);
 
   useEffect(() => {
     const first = commandLessons[lesson.id]?.steps[0];
@@ -88,7 +106,10 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     setResult(next);
     setHistory((previous) => [next, ...previous].slice(0, 8));
     setInput('');
-    if (raw.trim() === step.command) setRanCurrentStep(true);
+    if (raw.trim() === step.command) {
+      setRanCurrentStep(true);
+      setCompletedSteps((previous) => previous.includes(step.id) ? previous : [...previous, step.id]);
+    }
   };
 
   const chooseStep = (nextIndex: number) => {
@@ -153,7 +174,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     </details>}
 
     <div className="command-progress">
-      <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')}</span><b>{step.title}</b></div>
+      <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')} · {completedSteps.length} COMPLETED</span><b>{step.title}</b></div>
       <div className="command-progress-track"><i style={{ width: progress + '%' }}/></div>
       <span className="command-progress-count">{Math.round(progress)}%</span>
     </div>
@@ -277,7 +298,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
             <button className="button-primary" onClick={nextStep} disabled={stepIndex === steps.length - 1}>{stepIndex === steps.length - 1 ? 'All commands complete' : 'Next command'} {stepIndex === steps.length - 1 ? <CheckCircle2 size={15}/> : <ArrowRight size={15}/>}</button>
           </div>
           {stepIndex === steps.length - 1 && <button className={'button-secondary full command-complete-button ' + (completed ? 'is-complete' : '')} onClick={() => onComplete(lesson.id)}>{completed ? <><CheckCircle2 size={16}/> Lesson completed</> : <>Complete lesson <CheckCircle2 size={16}/></>}</button>}
-          <div className="step-dots" aria-label="Command steps">{steps.map((item, index) => <button key={item.id} className={index === stepIndex ? 'active' : index < stepIndex ? 'visited' : ''} aria-label={'Go to ' + item.title} title={item.title} onClick={() => chooseStep(index)}/>)}</div>
+          <div className="step-dots" aria-label="Command steps">{steps.map((item, index) => <button key={item.id} className={index === stepIndex ? 'active' : completedSteps.includes(item.id) ? 'visited completed' : ''} aria-label={(completedSteps.includes(item.id) ? 'Completed: ' : 'Go to ') + item.title} title={(completedSteps.includes(item.id) ? 'Completed · ' : '') + item.title} onClick={() => chooseStep(index)}>{completedSteps.includes(item.id) ? '✓' : ''}</button>)}</div>
         </article>
         <div className="command-bottom-navigation"><div className="lesson-navigation-label"><b>Lesson navigation</b><span>Move between topics independently of command steps.</span></div><div className="lesson-navigation-actions"><button className="button-secondary" disabled={!canGoPrevious} onClick={onPreviousLesson}><ArrowLeft size={15}/> Previous lesson</button><button className="button-primary" disabled={!canGoNext} onClick={onNextLesson}>Next lesson <ArrowRight size={15}/></button></div></div>
       </aside>

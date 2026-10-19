@@ -99,6 +99,83 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     return { command, output: '', status: 'Directory changed to ' + next + '. Run pwd to verify it.', cwd: next };
   }
 
+  // File operations mutate only the in-memory training filesystem; no host files are touched.
+  if (/^mkdir\s+/.test(command)) {
+    const args = command.replace(/^mkdir\s+/, '').split(/\s+/);
+    const parents = args[0] === '-p';
+    const targets = parents ? args.slice(1) : args;
+    if (!targets.length) return { command, output: '', status: 'Usage: mkdir [-p] DIRECTORY', cwd };
+    for (const target of targets) {
+      const path = resolvePath(shellQuoteTrim(target), cwd);
+      const name = path.split('/').pop() || '';
+      const parent = path.slice(0, path.lastIndexOf('/')) || '/';
+      if (FS[path]) {
+        if (parents) continue;
+        return { command, output: '', status: 'mkdir: cannot create directory: already exists: ' + path, cwd };
+      }
+      if (!FS[parent]) return { command, output: '', status: 'mkdir: parent directory does not exist: ' + parent + '. Create or navigate to the parent first.', cwd };
+      FS[path] = [];
+      if (!FS[parent].includes(name)) FS[parent].push(name);
+    }
+    return { command, output: '', status: 'Directory created in the virtual training filesystem. Run ls to verify.', cwd };
+  }
+
+  if (/^touch\s+/.test(command)) {
+    const targets = command.replace(/^touch\s+/, '').split(/\s+/);
+    for (const target of targets) {
+      const path = resolvePath(shellQuoteTrim(target), cwd);
+      const name = path.split('/').pop() || '';
+      const parent = path.slice(0, path.lastIndexOf('/')) || '/';
+      if (!FS[parent]) return { command, output: '', status: 'touch: parent directory does not exist: ' + parent, cwd };
+      if (FS[path]) return { command, output: '', status: 'touch: this training simulator only creates new sample files; entry already exists: ' + path, cwd };
+      FS[path] = [];
+      (FS[parent] ??= []).push(name);
+    }
+    return { command, output: '', status: 'Empty file created in the virtual training filesystem. Run ls to verify.', cwd };
+  }
+
+  if (/^(cp|mv)\s+/.test(command)) {
+    const [operation, ...args] = command.split(/\s+/);
+    if (args.length !== 2) return { command, output: '', status: 'Usage: ' + operation + ' SOURCE DESTINATION (this starter simulator supports one source and one destination).', cwd };
+    const source = resolvePath(shellQuoteTrim(args[0]), cwd);
+    const destination = resolvePath(shellQuoteTrim(args[1]), cwd);
+    const sourceParent = source.slice(0, source.lastIndexOf('/')) || '/';
+    const sourceName = source.split('/').pop() || '';
+    const destinationIsDirectory = !!FS[destination];
+    const finalPath = destinationIsDirectory ? normalizePath(destination + '/' + sourceName) : destination;
+    const finalParent = finalPath.slice(0, finalPath.lastIndexOf('/')) || '/';
+    const finalName = finalPath.split('/').pop() || '';
+    if (!FS[sourceParent]?.includes(sourceName) || !Object.prototype.hasOwnProperty.call(FS, source)) return { command, output: '', status: operation + ': source not found in virtual filesystem: ' + source, cwd };
+    if (!FS[finalParent]) return { command, output: '', status: operation + ': destination parent does not exist: ' + finalParent, cwd };
+    if (FS[finalPath] || FS[finalParent].includes(finalName)) return { command, output: '', status: operation + ': destination already exists: ' + finalPath, cwd };
+    FS[finalPath] = [...(FS[source] ?? [])];
+    FS[finalParent].push(finalName);
+    if (operation === 'mv') {
+      delete FS[source];
+      FS[sourceParent] = FS[sourceParent].filter((entry) => entry !== sourceName);
+    }
+    return { command, output: '', status: operation === 'cp' ? 'Copied the entry in the virtual training filesystem.' : 'Moved/renamed the entry in the virtual training filesystem.', cwd };
+  }
+
+  if (/^rm\s+/.test(command)) {
+    const args = command.replace(/^rm\s+/, '').split(/\s+/);
+    const recursive = args[0] === '-r' || args[0] === '-rf' || args[0] === '-fr';
+    const targets = recursive ? args.slice(1) : args;
+    for (const target of targets) {
+      const path = resolvePath(shellQuoteTrim(target), cwd);
+      const name = path.split('/').pop() || '';
+      const parent = path.slice(0, path.lastIndexOf('/')) || '/';
+      if (!FS[parent]?.includes(name) || !Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'rm: cannot remove: no such entry in virtual filesystem: ' + path, cwd };
+      if (FS[path].length && !recursive) return { command, output: '', status: 'rm: cannot remove ' + path + ': is a directory. This simulator requires rm -r for directories; inspect carefully before using it.', cwd };
+      if (recursive) {
+        const prefix = path + '/';
+        Object.keys(FS).filter((entry) => entry === path || entry.startsWith(prefix)).forEach((entry) => delete FS[entry]);
+      } else delete FS[path];
+      FS[parent] = (FS[parent] ?? []).filter((entry) => entry !== name);
+    }
+    return { command, output: '', status: 'Entry removed from the virtual training filesystem only. Verify with ls.', cwd };
+  }
+
   if (command === 'ls' || command === 'ls -a' || command === 'ls -la' || command === 'ls -al') {
     const entries = directoryEntries(cwd, command !== 'ls');
     if (command === 'ls -la' || command === 'ls -al') {

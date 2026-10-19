@@ -78,6 +78,18 @@ describe('Linux terminal virtual filesystem and state', () => {
     expect(executeCommand('echo hello > /missing-dir/file.txt', cwd, steps).status).toContain('parent directory does not exist');
   });
 
+  it('prints environment variables on separate lines', () => {
+    const result = executeCommand('env', cwd, steps);
+    expect(result.output).toContain('HOME=/home/student\\n');
+    expect(result.output).toContain('PATH=/opt/ros/humble/bin');
+    expect(result.output.split('\\n').length).toBeGreaterThan(1);
+  });
+
+  it('preserves spaces and quoted text when redirecting output', () => {
+    executeCommand('echo "front lidar" > /tmp/ros-academy-quoted-test.txt', cwd, steps);
+    expect(executeCommand('cat /tmp/ros-academy-quoted-test.txt', cwd, steps).output).toBe('front lidar\\n');
+  });
+
   it('reflects simulated process termination in later process listings', () => {
     expect(executeCommand('ps -ef', cwd, steps).output).toContain('demo_node');
     executeCommand('kill -TERM 1042', cwd, steps);

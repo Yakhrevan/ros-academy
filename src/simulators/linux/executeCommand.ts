@@ -223,6 +223,16 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command.startsWith('sudo apt install ')) return { command, output: 'Simulated package installation preview; nothing was installed.', status: 'No package manager was run.', cwd };
   if (command === 'source /opt/ros/humble/setup.bash') { simulatedRosDistro = 'humble'; return { command, output: '', status: 'Simulated ROS 2 Humble environment loaded. Run echo $ROS_DISTRO to verify; your host shell is unchanged.', cwd }; }
   if (command === 'echo $ROS_DISTRO') return { command, output: simulatedRosDistro, status: simulatedRosDistro ? 'Training environment only.' : 'ROS_DISTRO is not set in this simulated shell.', cwd };
+  if (command.startsWith('grep ')) {
+    const args = command.slice(5).trim().split(/\\s+/);
+    if (args.length < 2) return { command, output: '', status: 'Usage: grep PATTERN FILE', cwd };
+    const pattern = args[0].replace(/^['\"]|['\"]$/g, '');
+    const path = resolvePath(args[1].replace(/^['\"]|['\"]$/g, ''), cwd);
+    if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'grep: no such file in virtual filesystem: ' + path, cwd };
+    if (FS[path]) return { command, output: '', status: 'grep: ' + path + ': is a directory', cwd };
+    const matches = (virtualFileContents[path] || '').split('\\n').filter(line => line.includes(pattern));
+    return { command, output: matches.join('\\n'), status: matches.length ? 'Filtered virtual file content; no host files were read.' : 'No matching lines found.', cwd };
+  }
   if (command.startsWith('cat ')) { const target = command.slice(4).trim().replace(/^['\"]|['\"]$/g, ''); const path = resolvePath(target, cwd); if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd }; if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd }; return { command, output: virtualFileContents[path] ?? '', status: 'Read virtual file contents only; no host files were accessed.', cwd }; }
   if (command === 'getent hosts github.com') return { command, output: '140.82.112.3 github.com (illustrative)', status: 'Illustrative name-resolution result; no DNS lookup occurred.', cwd };
   if (command.startsWith('ssh ')) return { command, output: 'robot@amr:~$ (simulated remote prompt)', status: 'No network connection or authentication was attempted.', cwd };

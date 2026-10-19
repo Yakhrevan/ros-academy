@@ -61,6 +61,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   const [quizPassed, setQuizPassed] = useState(false);
   const [passedChecks, setPassedChecks] = useState<string[]>([]);
   const [checksLoadedFor, setChecksLoadedFor] = useState('');
+  const [positionLoadedFor, setPositionLoadedFor] = useState('');
   const previousStepIndex = useRef(stepIndex);
 
   useEffect(() => {
@@ -69,6 +70,36 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       document.getElementById('command-step-description')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [stepIndex]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('ros-academy:lesson-position:' + lesson.id);
+      if (saved) {
+        const position = JSON.parse(saved) as { stepIndex?: number; activeStage?: string; cwd?: string; input?: string };
+        if (typeof position.stepIndex === 'number' && Number.isFinite(position.stepIndex)) {
+          setStepIndex(Math.max(0, Math.min(steps.length - 1, Math.floor(position.stepIndex))));
+        }
+        if (position.activeStage === 'learn' || position.activeStage === 'watch' || position.activeStage === 'practice' || position.activeStage === 'check') {
+          setActiveStage(position.activeStage);
+        }
+        if (typeof position.cwd === 'string' && position.cwd.startsWith('/home/student')) setCwd(position.cwd);
+        if (typeof position.input === 'string') setInput(position.input.slice(0, 500));
+      }
+    } catch {
+      // A missing or invalid resume position should never block the lesson.
+    } finally {
+      setPositionLoadedFor(lesson.id);
+    }
+  }, [lesson.id]);
+
+  useEffect(() => {
+    if (positionLoadedFor !== lesson.id) return;
+    try {
+      window.localStorage.setItem('ros-academy:lesson-position:' + lesson.id, JSON.stringify({ stepIndex, activeStage, cwd, input }));
+    } catch {
+      // Resume position remains available in this session if storage is unavailable.
+    }
+  }, [lesson.id, stepIndex, activeStage, cwd, input, positionLoadedFor]);
 
   useEffect(() => {
     try {

@@ -130,7 +130,7 @@ describe('Linux terminal virtual filesystem and state', () => {
   it('does not split semicolons or conditional operators inside quoted text', () => {
     resetTerminalSimulator();
     executeCommand('echo "sensor; front && rear" > /tmp/quoted-operators.txt', cwd, steps);
-    expect(executeCommand('cat /tmp/quoted-operators.txt', cwd, steps).output).toBe('sensor; front && rear\\n');
+    expect(executeCommand('cat /tmp/quoted-operators.txt', cwd, steps).output).toBe('sensor; front && rear\n');
   });
 
   it('reflects simulated process termination in later process listings', () => {

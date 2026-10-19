@@ -6,6 +6,7 @@ import PathPredictionPractice from './PathPredictionPractice';
 import FileOperationsPractice from './FileOperationsPractice';
 import FileReadingPractice from './FileReadingPractice';
 import PipelinePractice from './PipelinePractice';
+import ProcessManagementPractice from './ProcessManagementPractice';
 import type { Lesson } from '../../types/lesson';
 import type { CommandStep } from '../../types/commandLesson';
 import { commandLessons } from '../../data/commandLessons';
@@ -119,6 +120,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     {lesson.id === 'linux-files' && <FileOperationsPractice />}
     {lesson.id === 'linux-files' && <FileReadingPractice />}
     {lesson.id === 'linux-files' && <PipelinePractice />}
+    {lesson.id === 'linux-files' && <ProcessManagementPractice />}
 
     <div className="command-progress">
       <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')}</span><b>{step.title}</b></div>

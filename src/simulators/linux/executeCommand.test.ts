@@ -80,14 +80,14 @@ describe('Linux terminal virtual filesystem and state', () => {
 
   it('prints environment variables on separate lines', () => {
     const result = executeCommand('env', cwd, steps);
-    expect(result.output).toContain('HOME=/home/student\\n');
+    expect(result.output).toContain('HOME=/home/student\n');
     expect(result.output).toContain('PATH=/opt/ros/humble/bin');
-    expect(result.output.split('\\n').length).toBeGreaterThan(1);
+    expect(result.output.split('\n').length).toBeGreaterThan(1);
   });
 
   it('preserves spaces and quoted text when redirecting output', () => {
     executeCommand('echo "front lidar" > /tmp/ros-academy-quoted-test.txt', cwd, steps);
-    expect(executeCommand('cat /tmp/ros-academy-quoted-test.txt', cwd, steps).output).toBe('front lidar\\n');
+    expect(executeCommand('cat /tmp/ros-academy-quoted-test.txt', cwd, steps).output).toBe('front lidar\n');
   });
 
   it('reflects simulated process termination in later process listings', () => {

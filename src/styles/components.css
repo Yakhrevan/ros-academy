@@ -287,3 +287,16 @@
 .path-pieces>span{color:#8ea7c5;font-size:9px;text-transform:uppercase;letter-spacing:.06em}
 .path-pieces>code{min-width:0;padding:7px;border-radius:5px;background:#0d1929;color:#b5ffdc;font:11px/1.6 'DM Mono',monospace;overflow-wrap:anywhere}
 @media(max-width:420px){.path-pieces{grid-template-columns:1fr}.path-pieces>span:nth-of-type(2){margin-top:4px}}
+
+
+/* Break a resolved Linux path into readable directory segments */
+.path-tree{margin-top:11px;padding:10px;border:1px solid #344b65;border-radius:8px;background:#101e30}
+.path-tree-label{display:block;margin-bottom:8px;color:#91b2d8;font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.path-tree-segments{display:flex;flex-direction:column;gap:5px}
+.path-root{width:fit-content;padding:2px 7px;border-radius:5px;background:#203650;color:#a9ceff;font:12px 'DM Mono',monospace}
+.path-tree-segment{display:grid;grid-template-columns:16px minmax(0,1fr) auto;align-items:center;gap:7px;margin-left:9px;padding:6px 8px;border-left:1px solid #46617f;border-radius:5px;background:#192b41}
+.path-tree-branch{color:#8aa5c6;font:11px 'DM Mono',monospace}
+.path-tree-segment code{min-width:0;color:#e5f0ff;font:11px 'DM Mono',monospace;overflow-wrap:anywhere}
+.path-tree-segment small{color:#91bda9;font-size:9px}
+.path-tree>p{margin:9px 0 0;color:#b8c9dd;font-size:10px;line-height:1.7}
+.path-tree>p code{color:#a7cbff;font-family:'DM Mono',monospace}

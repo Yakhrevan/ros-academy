@@ -85,6 +85,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   const command = raw.trim();
   if (!command) return { command, output: '', status: 'Type a command first.', cwd };
 
+  if (command === 'help') return { command, output: 'Navigation: pwd, ls, cd DIR, cd .., cd ~, cd -\\nFiles: mkdir DIR, touch FILE, cat FILE, cp SRC DEST, mv SRC DEST, rm FILE\\nEnvironment: whoami, env, printenv, echo $HOME, echo $ROS_DISTRO, source /opt/ros/humble/setup.bash\\nDiagnostics: ps -ef, free -h, uptime, ip addr, ip route, lsblk, dmesg\\nROS: ros2 node list, ros2 topic list\\nAll commands are simulated; nothing runs on your computer.', status: 'Displayed supported command groups for this virtual terminal.', cwd };
   if (command === 'clear') return { command, output: '', status: 'Terminal output cleared.', cwd };
   if (command === 'pwd') return { command, output: cwd, status: 'Printed the current working directory. No state changed.', cwd };
   if (command === 'whoami') return { command, output: 'student', status: 'Displayed the current simulated user.', cwd };

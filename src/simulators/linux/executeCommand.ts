@@ -106,7 +106,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     return { command, output: '', status: 'Removed ' + name + ' from the simulated shell environment only.', cwd };
   }
   if (command === 'env' || command === 'printenv') {
-    const values = { ...simulatedEnvironment, PWD: cwd };
+    const values: Record<string, string> = { ...simulatedEnvironment, PWD: cwd };
     if (simulatedRosDistro) values.ROS_DISTRO = simulatedRosDistro;
     const output = Object.entries(values).map(([name, value]) => name + '=' + value).join('\\n');
     return { command, output, status: 'Displayed simulated shell variables; host environment was not accessed.', cwd };

@@ -629,7 +629,7 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         roboticsUse: 'Always verify generated configuration and diagnostic output before using it in a real deployment workflow.'
       }
     ]
-  },,
+  },
 
   'linux-process-state': {
     lessonId: 'linux-process-state',

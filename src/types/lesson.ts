@@ -1,0 +1,1 @@
+export type Lesson = { id: string; title: string; description: string; level: string; icon: string; phase: string; duration: string; objectives: string[]; explanation: string; example: string; output: string; quiz: string; options: string[]; answer: number; why: string; industrial: string };

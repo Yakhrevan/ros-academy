@@ -277,3 +277,13 @@
 .permission-breakdown>p:last-child{margin:10px 0 0;color:#b7cbbb;font-size:10px;line-height:1.75}
 .permission-breakdown>p:last-child code{color:#a7cbff;font-family:'DM Mono',monospace}
 @media(max-width:420px){.permission-groups{grid-template-columns:1fr}.permission-group{grid-template-columns:42px 1fr;align-items:center}.permission-group>code{grid-row:span 2}.permission-group>span{grid-column:2}}
+
+
+/* Absolute and relative path explainer */
+.path-explanation{margin:12px 0;padding:11px;border:1px solid #344b65;border-radius:8px;background:#15263b}
+.path-kind{display:inline-flex;padding:5px 8px;border:1px solid #426c9b;border-radius:6px;background:#1b334d;color:#a9ceff;font-size:10px;font-weight:800}
+.path-explanation>p{margin:9px 0;color:#c2d2e4;font-size:11px;line-height:1.75}
+.path-pieces{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 10px;padding-top:9px;border-top:1px solid #344b65}
+.path-pieces>span{color:#8ea7c5;font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.path-pieces>code{min-width:0;padding:7px;border-radius:5px;background:#0d1929;color:#b5ffdc;font:11px/1.6 'DM Mono',monospace;overflow-wrap:anywhere}
+@media(max-width:420px){.path-pieces{grid-template-columns:1fr}.path-pieces>span:nth-of-type(2){margin-top:4px}}

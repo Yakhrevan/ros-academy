@@ -872,3 +872,23 @@
 .command-lesson-page[data-learning-stage="check"] .command-learning-main{display:grid}
 .command-lesson-page[data-learning-stage="check"] .command-practice-column{display:grid;grid-template-columns:minmax(0,1fr)}
 .command-lesson-page[data-learning-stage="check"] .command-reasoning-panel{display:block}
+
+/* Dashboard learning progress overview */
+.dashboard-progress-overview{margin:0 0 24px;padding:22px;border:1px solid #dce7f5;border-radius:16px;background:linear-gradient(125deg,#f5f9ff 0%,#fff 72%);box-shadow:0 6px 22px rgba(28,82,146,.04)}
+.dashboard-progress-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.dashboard-progress-heading h2{margin:5px 0 5px;color:#183453;font-size:20px;letter-spacing:-.03em}
+.dashboard-progress-heading p{margin:0;color:#6b7f95;font-size:11px;line-height:1.7}
+.dashboard-progress-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #cfe6da;border-radius:999px;background:#effaf4;color:#24724f;font-size:10px;font-weight:800;white-space:nowrap}
+.dashboard-progress-metrics{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px}
+.dashboard-progress-metrics>div{min-width:0;padding:14px;border:1px solid #e1eaf5;border-radius:11px;background:#fff}
+.dashboard-progress-metrics>div>span{display:block;color:#71839a;font-size:10px;font-weight:700}
+.dashboard-progress-metrics>div>b{display:block;margin-top:7px;color:#1c3d64;font-size:24px;letter-spacing:-.04em}
+.dashboard-progress-metrics>div>b small{font-size:11px;color:#7b8ea5;letter-spacing:0}
+.dashboard-progress-metrics>div>p{margin:5px 0 0;color:#75879b;font-size:10px;line-height:1.6}
+.dashboard-progress-track{height:6px;margin-top:10px;overflow:hidden;border-radius:99px;background:#e9f0fa}
+.dashboard-progress-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#3989ed,#56bba0);transition:width .25s ease}
+.dashboard-resume-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:13px;padding:15px;border:1px solid #e0e9f5;border-radius:11px;background:#fff}
+.dashboard-resume-copy{display:grid;gap:5px;min-width:0}
+.dashboard-resume-copy>b{color:#203c5b;font-size:13px}
+.dashboard-resume-copy>small{color:#71839a;font-size:10px;line-height:1.6}
+@media(max-width:700px){.dashboard-progress-overview{padding:16px}.dashboard-progress-heading{flex-direction:column;gap:10px}.dashboard-progress-metrics{grid-template-columns:1fr 1fr}.dashboard-progress-metrics>div:first-child{grid-column:1/-1}.dashboard-progress-metrics>div>b{font-size:21px}.dashboard-resume-row{align-items:stretch;flex-direction:column}.dashboard-resume-row .button-primary{justify-content:center;width:100%}}

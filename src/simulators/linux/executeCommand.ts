@@ -185,15 +185,25 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     return { command, output: '', status: 'Entry removed from the virtual training filesystem only. Verify with ls.', cwd };
   }
 
-  if (command === 'ls' || command === 'ls -a' || command === 'ls -la' || command === 'ls -al') {
-    const entries = directoryEntries(cwd, command !== 'ls');
-    if (command === 'ls -la' || command === 'ls -al') {
-      const rows = entries.map((entry) => (FS[normalizePath(cwd + '/' + entry)] ? 'drwxr-xr-x' : '-rw-r--r--') + '  student student  ' + entry);
-      return { command, output: '.  ..\n' + rows.join('\n'), status: 'Listed directory entries and simplified metadata. Sample permissions are illustrative.', cwd };
+  if (/^ls(?:\s|$)/.test(command)) {
+    const args = command.split(/\s+/).slice(1);
+    const flags = args.filter((arg) => arg.startsWith('-'));
+    const targets = args.filter((arg) => !arg.startsWith('-'));
+    const targetPath = targets.length ? resolvePath(targets[0], cwd) : cwd;
+    const all = flags.some((flag) => flag.includes('a'));
+    const detailed = flags.some((flag) => flag.includes('l'));
+    if (!Object.prototype.hasOwnProperty.call(FS, targetPath)) return { command, output: '', status: 'ls: cannot access ' + targetPath + ': no such entry in the virtual filesystem.', cwd };
+    if (!FS[targetPath]) {
+      const name = targetPath.split('/').pop() || targetPath;
+      return { command, output: detailed ? '-rw-r--r-- 1 student student 0 ' + name : name, status: 'Listed the requested virtual file. The working directory did not change.', cwd };
     }
-    return { command, output: entries.join('  ') || '(empty directory)', status: 'Listed entries in ' + cwd + '. The working directory did not change.', cwd };
+    const entries = directoryEntries(targetPath, all);
+    if (detailed) {
+      const rows = entries.map((entry) => (FS[normalizePath(targetPath + '/' + entry)] ? 'drwxr-xr-x' : '-rw-r--r--') + '  student student  ' + entry);
+      return { command, output: '.  ..\n' + rows.join('\n'), status: 'Listed virtual directory entries with simplified illustrative metadata.', cwd };
+    }
+    return { command, output: entries.join('  ') || '(empty directory)', status: 'Listed entries in ' + targetPath + '. The working directory did not change.', cwd };
   }
-
 
   if (command === 'ls -l deploy.sh') return { command, output: '-rw-r--r-- 1 student student 128 deploy.sh', status: 'Illustrative metadata only.', cwd };
   if (command === 'chmod u+x deploy.sh') return { command, output: '', status: 'Simulated only: owner execute bit added for the lesson; no real file was modified.', cwd };
@@ -224,14 +234,31 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'source /opt/ros/humble/setup.bash') { simulatedRosDistro = 'humble'; return { command, output: '', status: 'Simulated ROS 2 Humble environment loaded. Run echo $ROS_DISTRO to verify; your host shell is unchanged.', cwd }; }
   if (command === 'echo $ROS_DISTRO') return { command, output: simulatedRosDistro, status: simulatedRosDistro ? 'Training environment only.' : 'ROS_DISTRO is not set in this simulated shell.', cwd };
   if (command.startsWith('grep ')) {
-    const args = command.slice(5).trim().split(/\\s+/);
+    const args = command.slice(5).trim().split(/\s+/);
     if (args.length < 2) return { command, output: '', status: 'Usage: grep PATTERN FILE', cwd };
-    const pattern = args[0].replace(/^['\"]|['\"]$/g, '');
-    const path = resolvePath(args[1].replace(/^['\"]|['\"]$/g, ''), cwd);
+    const pattern = args[0].replace(/^['"]|['"]$/g, '');
+    const path = resolvePath(args[1].replace(/^['"]|['"]$/g, ''), cwd);
     if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'grep: no such file in virtual filesystem: ' + path, cwd };
     if (FS[path]) return { command, output: '', status: 'grep: ' + path + ': is a directory', cwd };
-    const matches = (virtualFileContents[path] || '').split('\\n').filter(line => line.includes(pattern));
-    return { command, output: matches.join('\\n'), status: matches.length ? 'Filtered virtual file content; no host files were read.' : 'No matching lines found.', cwd };
+    const matches = (virtualFileContents[path] || '').split(/\r?\n/).filter((line) => line.includes(pattern));
+    return { command, output: matches.join('\n'), status: matches.length ? 'Filtered virtual file content; no host files were read.' : 'No matching lines found.', cwd };
+  }
+  if (command.startsWith('find ')) {
+    const args = command.slice(5).trim().split(/\s+/);
+    const nameIndex = args.indexOf('-name');
+    if (nameIndex < 1 || !args[nameIndex + 1]) return { command, output: '', status: 'Usage: find PATH -name PATTERN', cwd };
+    const root = resolvePath(args[0], cwd);
+    if (!Object.prototype.hasOwnProperty.call(FS, root)) return { command, output: '', status: 'find: starting path does not exist in the virtual filesystem: ' + root, cwd };
+    const pattern = args[nameIndex + 1].replace(/^['"]|['"]$/g, '');
+    const matches: string[] = [];
+    const candidates = [...new Set([...Object.keys(FS), ...Object.keys(virtualFileContents)])];
+    for (const path of candidates) {
+      if (path !== root && !path.startsWith(root === '/' ? '/' : root + '/')) continue;
+      const name = path.split('/').pop() || '/';
+      const regex = new RegExp('^' + pattern.split('*').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+      if (regex.test(name)) matches.push(root === '/' ? '.' + path : path === root ? '.' : './' + path.slice(root.length + 1));
+    }
+    return { command, output: matches.join('\n') || '(no matches)', status: 'Searched only the virtual training filesystem; no host files were accessed.', cwd };
   }
   if (command.startsWith('cat ')) { const target = command.slice(4).trim().replace(/^['\"]|['\"]$/g, ''); const path = resolvePath(target, cwd); if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd }; if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd }; return { command, output: virtualFileContents[path] ?? '', status: 'Read virtual file contents only; no host files were accessed.', cwd }; }
   if (command === 'getent hosts github.com') return { command, output: '140.82.112.3 github.com (illustrative)', status: 'Illustrative name-resolution result; no DNS lookup occurred.', cwd };

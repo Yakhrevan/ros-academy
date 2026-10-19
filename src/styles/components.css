@@ -184,3 +184,7 @@
 .lesson-navigation-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .lesson-navigation-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px}
 @media(max-width:600px){.command-step-navigation,.lesson-navigation-actions{grid-template-columns:1fr}.lesson-navigation-label span{font-size:12px}}
+
+
+/* Keep the active command description visible after Next command */
+#command-step-description{scroll-margin-top:18px}

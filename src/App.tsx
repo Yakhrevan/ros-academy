@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Lesson } from './types/lesson';
 import { lessons, paths, phases } from './data/curriculum';
-import { linuxCommandOutputs } from './simulators/linux/commandOutputs';
+import { getLinuxCommandOutputs } from './simulators/linux/commandOutputs';
 import LessonCard from './components/learning/LessonCard';
 import { Activity, ArrowDown, ArrowRight, Atom, BookOpen, Bot, Check, ChevronRight, CircleHelp, Code2, Cpu, Gamepad2, GitBranch, GraduationCap, Layers3, Menu, Network, Play, Radio, RotateCcw, Search, ShieldCheck, Sparkles, Terminal, Trophy, X, Zap } from 'lucide-react';
 
@@ -30,7 +30,7 @@ function App() {
  const toggleComplete = (id:string) => { const exists=completed.includes(id); setCompleted(prev=>exists?prev.filter(x=>x!==id):[...prev,id]); if(!exists){addXp(20);notify('Lesson completed · +20 XP');} else {notify('Lesson marked incomplete');} };
  const runCommand = (raw:string) => {
  const cmd=raw.trim(); if(!cmd)return;
- const output=linuxCommandOutputs;
+ const output=getLinuxCommandOutputs(linuxPath);
  let value='';
  if(cmd==='clear'){setLinuxHistory([]);setTerm(cmd);setTermOutput('Terminal cleared.');setLinuxInput('');return;}
  if(cmd==='cd'||cmd==='cd ~'){setLinuxPath('/home/student');value='Working directory changed to /home/student';}

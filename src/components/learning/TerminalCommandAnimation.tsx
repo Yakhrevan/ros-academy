@@ -10,6 +10,8 @@ export default function TerminalCommandAnimation({ command, output, cwd, title }
   const [newDirectory, setNewDirectory] = useState<string | null>(null);
   const timer = useRef<number | undefined>(undefined);
   const isCd = /^cd(?:\s|$)/.test(command.trim());
+  const isLs = /^ls(?:\s|$)/.test(command.trim());
+  const listedEntries: string[] = output.split(/\s+/).filter(Boolean);
 
   const resolveDirectory = () => {
     const arg = command.trim().replace(/^cd\s*/, '') || '~';

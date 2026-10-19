@@ -101,6 +101,17 @@ describe('Linux terminal virtual filesystem and state', () => {
     expect(executeCommand('false', cwd, steps).status).toContain('status 1');
   });
 
+  it('short-circuits && after a simulated failure', () => {
+    const result = executeCommand('false && echo should-not-run', cwd, steps);
+    expect(result.output).toBe('');
+    expect(result.status).toContain('false');
+  });
+
+  it('runs the right-hand command for || after a simulated failure', () => {
+    const result = executeCommand('false || echo recovered', cwd, steps);
+    expect(result.output).toBe('recovered');
+  });
+
   it('reflects simulated process termination in later process listings', () => {
     expect(executeCommand('ps -ef', cwd, steps).output).toContain('demo_node');
     executeCommand('kill -TERM 1042', cwd, steps);

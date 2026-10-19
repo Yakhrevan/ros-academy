@@ -114,18 +114,29 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'true') return { command, output: '', status: 'Exit status 0 (simulated).', cwd };
   if (command === 'false') return { command, output: '', status: 'Exit status 1 (simulated).', cwd };
 
-  if (command.includes(';')) {
-    const commands = command.split(';').map((part) => part.trim()).filter(Boolean);
+  if (command.includes(';') || command.includes(' && ') || command.includes(' || ')) {
+    const parts = command.split(/(\\s*&&\\s*|\\s*\\|\\|\\s*|;)/).filter((part) => part.trim());
     let currentCwd = cwd;
+    let lastExitCode = 0;
     const outputs: string[] = [];
     const statuses: string[] = [];
-    for (const part of commands) {
-      const result = executeCommand(part, currentCwd, steps);
+    let previousOperator = ';';
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed === '&&' || trimmed === '||' || trimmed === ';') {
+        previousOperator = trimmed;
+        continue;
+      }
+      if (previousOperator === '&&' && lastExitCode !== 0) continue;
+      if (previousOperator === '||' && lastExitCode === 0) continue;
+      const result = executeCommand(trimmed, currentCwd, steps);
       currentCwd = result.cwd;
       if (result.output) outputs.push(result.output);
-      statuses.push(part + ': ' + result.status);
+      statuses.push(trimmed + ': ' + result.status);
+      lastExitCode = /status 1|not found|no such|cannot|Usage:|failed|error/i.test(result.status) ? 1 : 0;
+      previousOperator = ';';
     }
-    return { command, output: outputs.join('\\n'), status: statuses.join('\\n'), cwd: currentCwd };
+    return { command, output: outputs.join('\\n'), status: statuses.join('\\n') || 'No commands executed.', cwd: currentCwd };
   }
 
   if (command.startsWith('export ')) {

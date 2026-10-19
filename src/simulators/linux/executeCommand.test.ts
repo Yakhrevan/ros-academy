@@ -112,6 +112,20 @@ describe('Linux terminal virtual filesystem and state', () => {
     expect(result.output).toBe('recovered');
   });
 
+  it('evaluates chained && and || operators using the previous command status', () => {
+    resetTerminalSimulator();
+    const result = executeCommand('false && echo skipped || echo recovered && echo continued', cwd, steps);
+    expect(result.output).toBe('recovered\ncontinued');
+    expect(result.output).not.toContain('skipped');
+  });
+
+  it('preserves command order across conditional operators and semicolons', () => {
+    resetTerminalSimulator();
+    const result = executeCommand('true || echo skipped; echo after', cwd, steps);
+    expect(result.output).toBe('after');
+    expect(result.output).not.toContain('skipped');
+  });
+
   it('resets filesystem, environment, directory and process state to defaults', () => {
     resetTerminalSimulator();
     executeCommand('echo temporary > /tmp/reset-state-test.txt', cwd, steps);

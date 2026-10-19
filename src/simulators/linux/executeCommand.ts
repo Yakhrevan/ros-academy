@@ -63,7 +63,7 @@ function resolvePath(target: string, cwd: string): string {
 }
 
 function shellQuoteTrim(value: string): string {
-  return value.replace(/\$([A-Za-z_][A-Za-z0-9_]*)|\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_match, plain: string | undefined, braced: string | undefined) => SHELL_ENV[plain || braced || ''] ?? '');
+  return value.replace(/^['"]|['"]$/g, '');
 }
 
 function directoryEntries(cwd: string, all = false): string[] {
@@ -72,7 +72,7 @@ function directoryEntries(cwd: string, all = false): string[] {
 }
 
 let previousDirectory = '/home/student';
-const SHELL_ENV: Record<string, string> = { HOME: '/home/student', USER: 'student', LOGNAME: 'student', ROS_DISTRO: '', PATH: '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin' };
+const SHELL_ENV: Record<string, string> = { HOME: '/home/student', USER: 'student', LOGNAME: 'student', ROS_DISTRO: '', PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin' };
 const FILE_CONTENTS: Record<string, string> = {
   '/home/student/Documents/notes.txt': 'Remember to source the ROS 2 setup file before using ROS CLI tools.\n',
   '/home/student/ros2_ws/README.md': '# Robot workspace\nA simulated ROS 2 learning project.\n',
@@ -92,19 +92,19 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'clear') return { command, output: '', status: 'Terminal output cleared.', cwd };
   if (command === 'pwd') return { command, output: cwd, status: 'Printed the current working directory. No state changed.', cwd };
   if (command === 'whoami') return { command, output: SHELL_ENV.USER || 'student', status: 'Displayed the current simulated user.', cwd };
-  if (command === 'env' || command === 'printenv') return { command, output: Object.entries(SHELL_ENV).filter(([, value]) => value !== '').map(([key, value]) => key + '=' + value).join('\\n'), status: 'Displayed environment variables from the simulated shell.', cwd };
+  if (command === 'env' || command === 'printenv') return { command, output: Object.entries(SHELL_ENV).filter(([, value]) => value !== '').map(([key, value]) => key + '=' + value).join('\n'), status: 'Displayed environment variables from the simulated shell.', cwd };
   if (command.startsWith('printenv ')) { const key = command.slice(8).trim(); return { command, output: SHELL_ENV[key] || '', status: SHELL_ENV[key] ? 'Displayed ' + key + ' from the simulated environment.' : 'Environment variable is not set: ' + key, cwd }; }
   if (command.startsWith('export ')) {
     const assignment = command.slice(7).trim();
     const match = assignment.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
-    if (!match) return { command, output: '', status: 'Usage: export NAME=value. Use valid shell variable names.', cwd };
+    if (!match) return { command, output: '', status: 'Usage: export NAME=value.', cwd };
     SHELL_ENV[match[1]] = expandVariables(shellQuoteTrim(match[2]));
-    return { command, output: '', status: 'Set ' + match[1] + ' in the simulated shell environment. Run echo 
+    return { command, output: '', status: 'Set ' + match[1] + ' in the simulated shell. Verify with echo 
   if (command === 'echo $PWD') return { command, output: cwd, status: 'Expanded PWD in the current simulated shell.', cwd };
   if (command === 'echo $HOME') return { command, output: SHELL_ENV.HOME || '', status: 'Expanded HOME in the current simulated shell.', cwd };
-  if (command === 'echo $ROS_DISTRO') return { command, output: SHELL_ENV.ROS_DISTRO || '', status: SHELL_ENV.ROS_DISTRO ? 'ROS_DISTRO is set in the simulated shell.' : 'ROS_DISTRO is not set in this simulated shell. Source the ROS setup file to set it.', cwd };
+  if (command === 'echo $ROS_DISTRO') return { command, output: SHELL_ENV.ROS_DISTRO || '', status: SHELL_ENV.ROS_DISTRO ? 'ROS_DISTRO is set in the simulated shell.' : 'ROS_DISTRO is not set. Source the ROS setup file in this simulated shell.', cwd };
   if (command === 'echo $PATH') return { command, output: SHELL_ENV.PATH || '', status: 'Printed the simulated PATH variable.', cwd };
-  if (command.startsWith('echo ')) return { command, output: expandVariables(shellQuoteTrim(command.slice(5))), status: 'echo expands simulated environment variables and writes the result to stdout.', cwd };
+  if (command.startsWith('echo ')) return { command, output: expandVariables(shellQuoteTrim(command.slice(5))), status: 'echo expands simulated environment variables and writes to stdout.', cwd };
 
   if (command === 'cd' || command === 'cd ~') { previousDirectory = cwd; return { command, output: '', status: 'Directory changed to /home/student. Successful cd normally prints no stdout.', cwd: '/home/student' }; }
   if (command === 'cd -') {
@@ -149,7 +149,6 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
       if (!FS[parent]) return { command, output: '', status: 'touch: parent directory does not exist: ' + parent, cwd };
       if (FS[path]) return { command, output: '', status: 'touch: this training simulator only creates new sample files; entry already exists: ' + path, cwd };
       FS[path] = [];
-      FILE_CONTENTS[path] = '';
       (FS[parent] ??= []).push(name);
     }
     return { command, output: '', status: 'Empty file created in the virtual training filesystem. Run ls to verify.', cwd };
@@ -192,7 +191,6 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
         const prefix = path + '/';
         Object.keys(FS).filter((entry) => entry === path || entry.startsWith(prefix)).forEach((entry) => delete FS[entry]);
       } else delete FS[path];
-      delete FILE_CONTENTS[path];
       FS[parent] = (FS[parent] ?? []).filter((entry) => entry !== name);
     }
     return { command, output: '', status: 'Entry removed from the virtual training filesystem only. Verify with ls.', cwd };
@@ -234,9 +232,9 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command.startsWith('printf ') && command.includes('| grep ros2')) return { command, output: 'ros2', status: 'The virtual pipeline filtered out non-matching lines.', cwd };
   if (command.startsWith('sudo apt update')) return { command, output: 'Reading package lists... Done (simulated)', status: 'No package manager was run.', cwd };
   if (command.startsWith('sudo apt install ')) return { command, output: 'Simulated package installation preview; nothing was installed.', status: 'No package manager was run.', cwd };
-  if (command === 'source /opt/ros/humble/setup.bash') { SHELL_ENV.ROS_DISTRO = 'humble'; SHELL_ENV.PATH = '/opt/ros/humble/bin:' + (SHELL_ENV.PATH || ''); return { command, output: '', status: 'Simulated ROS 2 Humble environment loaded into this training shell. Run echo $ROS_DISTRO to verify; your host shell is unchanged.', cwd }; }
-  if (command === 'echo $ROS_DISTRO') return { command, output: SHELL_ENV.ROS_DISTRO || '', status: SHELL_ENV.ROS_DISTRO ? 'Training environment only.' : 'ROS_DISTRO is not set; source the ROS setup file in this simulated shell.', cwd };
-  if (command.startsWith('cat ')) { const target = command.slice(4).trim(); const path = resolvePath(shellQuoteTrim(target), cwd); if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd }; if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd }; return { command, output: FILE_CONTENTS[path] ?? '', status: 'Read virtual file contents. No host files were accessed.', cwd }; }
+  if (command === 'source /opt/ros/humble/setup.bash') { SHELL_ENV.ROS_DISTRO = 'humble'; SHELL_ENV.PATH = '/opt/ros/humble/bin:' + (SHELL_ENV.PATH || ''); return { command, output: '', status: 'Simulated ROS 2 Humble environment loaded into this training shell. Your host shell is unchanged.', cwd }; }
+  if (command === 'echo $ROS_DISTRO') return { command, output: 'humble (simulated)', status: 'Training environment only.', cwd };
+  if (command.startsWith('cat ')) { const target = command.slice(4).trim(); const path = resolvePath(shellQuoteTrim(target), cwd); if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd }; if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd }; return { command, output: FILE_CONTENTS[path] ?? '', status: 'Read virtual file contents only; no host files were accessed.', cwd }; }
   if (command === 'getent hosts github.com') return { command, output: '140.82.112.3 github.com (illustrative)', status: 'Illustrative name-resolution result; no DNS lookup occurred.', cwd };
   if (command.startsWith('ssh ')) return { command, output: 'robot@amr:~$ (simulated remote prompt)', status: 'No network connection or authentication was attempted.', cwd };
   if (command.startsWith('ros2 ')) {
@@ -251,13 +249,13 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (sampleStep) return { command, output: sampleStep.expectedOutput, status: 'Sample output for this lesson; see the explanation above.', cwd };
 
   return { command, output: '', status: 'Command not implemented in this training shell. It was not run on your computer. Type help to view the lesson scope.', cwd };
-} + match[1] + ' to verify.', cwd };
+} + match[1] + '.', cwd };
   }
   if (command.startsWith('unset ')) {
     const key = command.slice(6).trim();
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) return { command, output: '', status: 'Usage: unset VARIABLE_NAME', cwd };
     delete SHELL_ENV[key];
-    return { command, output: '', status: 'Removed ' + key + ' from the simulated shell environment.', cwd };
+    return { command, output: '', status: 'Removed ' + key + ' from the simulated shell.', cwd };
   }
   if (command === 'echo $PWD') return { command, output: cwd, status: 'Expanded PWD in the current simulated shell.', cwd };
   if (command === 'echo $HOME') return { command, output: '/home/student', status: 'Expanded HOME in the current simulated shell.', cwd };
@@ -393,7 +391,7 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command.startsWith('sudo apt install ')) return { command, output: 'Simulated package installation preview; nothing was installed.', status: 'No package manager was run.', cwd };
   if (command === 'source /opt/ros/humble/setup.bash') return { command, output: '', status: 'Simulated: the lesson environment now treats ROS_DISTRO as humble; no host shell environment changed.', cwd };
   if (command === 'echo $ROS_DISTRO') return { command, output: 'humble (simulated)', status: 'Training environment only.', cwd };
-
+  if (command === 'cat README.md' || command === 'cat notes.txt') return { command, output: command === 'cat README.md' ? '# Robot workspace\nA simulated ROS 2 learning project.' : '', status: 'Read from the virtual training filesystem.', cwd };
   if (command === 'getent hosts github.com') return { command, output: '140.82.112.3 github.com (illustrative)', status: 'Illustrative name-resolution result; no DNS lookup occurred.', cwd };
   if (command.startsWith('ssh ')) return { command, output: 'robot@amr:~$ (simulated remote prompt)', status: 'No network connection or authentication was attempted.', cwd };
   if (command.startsWith('ros2 ')) {

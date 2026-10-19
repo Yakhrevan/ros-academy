@@ -111,6 +111,23 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
 
   if (command === 'help') return { command, output: 'Navigation: pwd, ls, cd DIR, cd .., cd ~, cd -\\nFiles: mkdir DIR, touch FILE, cat FILE, cp SRC DEST, mv SRC DEST, rm FILE\\nEnvironment: whoami, env, printenv, echo $HOME, echo $ROS_DISTRO, source /opt/ros/humble/setup.bash\\nDiagnostics: ps -ef, free -h, uptime, ip addr, ip route, lsblk, dmesg\\nROS: ros2 node list, ros2 topic list\\nAll commands are simulated; nothing runs on your computer.', status: 'Displayed supported command groups for this virtual terminal.', cwd };
   if (command === 'clear') return { command, output: '', status: 'Terminal output cleared.', cwd };
+  if (command === 'true') return { command, output: '', status: 'Exit status 0 (simulated).', cwd };
+  if (command === 'false') return { command, output: '', status: 'Exit status 1 (simulated).', cwd };
+
+  if (command.includes(';')) {
+    const commands = command.split(';').map((part) => part.trim()).filter(Boolean);
+    let currentCwd = cwd;
+    const outputs: string[] = [];
+    const statuses: string[] = [];
+    for (const part of commands) {
+      const result = executeCommand(part, currentCwd, steps);
+      currentCwd = result.cwd;
+      if (result.output) outputs.push(result.output);
+      statuses.push(part + ': ' + result.status);
+    }
+    return { command, output: outputs.join('\\n'), status: statuses.join('\\n'), cwd: currentCwd };
+  }
+
   if (command.startsWith('export ')) {
     const assignment = command.slice(7).trim();
     const match = assignment.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);

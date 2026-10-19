@@ -90,6 +90,17 @@ describe('Linux terminal virtual filesystem and state', () => {
     expect(executeCommand('cat /tmp/ros-academy-quoted-test.txt', cwd, steps).output).toBe('front lidar\n');
   });
 
+  it('executes semicolon-separated commands in order and carries cwd forward', () => {
+    const result = executeCommand('cd /tmp; pwd; echo done', cwd, steps);
+    expect(result.cwd).toBe('/tmp');
+    expect(result.output).toBe('/tmp\\ndone');
+  });
+
+  it('models true and false exit statuses without running host commands', () => {
+    expect(executeCommand('true', cwd, steps).status).toContain('status 0');
+    expect(executeCommand('false', cwd, steps).status).toContain('status 1');
+  });
+
   it('reflects simulated process termination in later process listings', () => {
     expect(executeCommand('ps -ef', cwd, steps).output).toContain('demo_node');
     executeCommand('kill -TERM 1042', cwd, steps);

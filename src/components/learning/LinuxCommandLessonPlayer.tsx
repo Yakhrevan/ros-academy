@@ -54,6 +54,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   const [showHints, setShowHints] = useState(false);
   const [ranCurrentStep, setRanCurrentStep] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [progressLoadedFor, setProgressLoadedFor] = useState('');
   const previousStepIndex = useRef(stepIndex);
 
   useEffect(() => {
@@ -67,18 +68,21 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     try {
       const saved = window.localStorage.getItem('ros-academy:completed-commands:' + lesson.id);
       setCompletedSteps(saved ? JSON.parse(saved) as string[] : []);
+      setProgressLoadedFor(lesson.id);
     } catch {
       setCompletedSteps([]);
+      setProgressLoadedFor(lesson.id);
     }
   }, [lesson.id]);
 
   useEffect(() => {
+    if (progressLoadedFor !== lesson.id) return;
     try {
       window.localStorage.setItem('ros-academy:completed-commands:' + lesson.id, JSON.stringify(completedSteps));
     } catch {
       // Progress remains available for this session when storage is unavailable.
     }
-  }, [completedSteps, lesson.id]);
+  }, [completedSteps, lesson.id, progressLoadedFor]);
 
   useEffect(() => {
     const first = commandLessons[lesson.id]?.steps[0];

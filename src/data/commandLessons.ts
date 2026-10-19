@@ -707,5 +707,82 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         roboticsUse: 'Verify shutdown before relaunching a ROS node to avoid duplicated publishers, device contention or multiple control loops.'
       }
     ]
-  },
+  },,
+
+  'linux-env-ros': {
+    lessonId: 'linux-env-ros',
+    intro: 'Understand shell variables and learn why ROS 2 setup scripts must be sourced in each new terminal.',
+    mentalModel: 'Environment variables are named values inherited by processes started from a shell. ROS setup scripts configure variables such as ROS_DISTRO and update lookup paths so ROS tools and packages can be found. This academy models a small environment in memory; it never changes your actual shell.',
+    steps: [
+      {
+        id: 'inspect-env-before',
+        title: 'Check the ROS distribution variable',
+        command: 'printenv ROS_DISTRO',
+        purpose: 'Check whether the current simulated shell has ROS_DISTRO set.',
+        syntax: 'printenv VARIABLE',
+        tokens: [
+          { token: 'printenv', role: 'command', meaning: 'Prints the value of a named environment variable.' },
+          { token: 'ROS_DISTRO', role: 'argument', meaning: 'The variable commonly identifies the ROS distribution in use.' }
+        ],
+        howItWorks: [
+          'The shell looks up ROS_DISTRO in its environment.',
+          'If the variable is unset, printenv produces no value and returns a non-zero status on a real shell.',
+          'The simulator reports the unset state in its status text.'
+        ],
+        expectedOutput: '(empty if ROS_DISTRO has not been set)',
+        outputMeaning: [
+          'An empty result means the simulated shell has no ROS distribution configured.',
+          'It does not prove ROS is uninstalled; it means this shell has not loaded the environment.'
+        ],
+        commonMistake: 'Do not assume ROS_DISTRO is set in every terminal just because ROS 2 is installed.',
+        roboticsUse: 'Check the shell environment when ros2 commands or package lookup fail in a new terminal.'
+      },
+      {
+        id: 'source-ros',
+        title: 'Load the ROS 2 Humble environment',
+        command: 'source /opt/ros/humble/setup.bash',
+        purpose: 'Load ROS 2 Humble environment variables into the current simulated shell.',
+        syntax: 'source SETUP_SCRIPT',
+        tokens: [
+          { token: 'source', role: 'shell builtin', meaning: 'Runs a setup script in the current shell so its environment changes remain available to subsequent commands.' },
+          { token: '/opt/ros/humble/setup.bash', role: 'path', meaning: 'The conventional setup script path for a system installation of ROS 2 Humble.' }
+        ],
+        howItWorks: [
+          'The setup script configures variables and search paths for the installed ROS distribution.',
+          'Because source runs in the current shell, the resulting environment is available to later commands in that terminal.',
+          'The academy records ROS_DISTRO=humble in its virtual environment only.'
+        ],
+        expectedOutput: '(no terminal output)',
+        outputMeaning: [
+          'Real setup scripts usually print nothing when successful.',
+          'The virtual status message confirms the simulated environment was updated; no host script is executed.'
+        ],
+        commonMistake: 'Running a setup script as a separate child process does not normally update the parent terminal environment. Use source or the dot builtin.',
+        roboticsUse: 'Source /opt/ros/humble/setup.bash before using ROS 2 CLI tools in a fresh terminal, then source your workspace install/setup.bash when appropriate.'
+      },
+      {
+        id: 'verify-env',
+        title: 'Verify the active distribution',
+        command: 'echo $ROS_DISTRO',
+        purpose: 'Confirm the environment variable changed after sourcing the setup script.',
+        syntax: 'echo $VARIABLE',
+        tokens: [
+          { token: 'echo', role: 'command', meaning: 'Writes its arguments to standard output.' },
+          { token: '$ROS_DISTRO', role: 'variable expansion', meaning: 'The shell substitutes the value of ROS_DISTRO before echo runs.' }
+        ],
+        howItWorks: [
+          'The shell expands $ROS_DISTRO using its current environment.',
+          'echo prints the resulting string.',
+          'The simulator reads the virtual environment state changed by the preceding source command.'
+        ],
+        expectedOutput: 'humble',
+        outputMeaning: [
+          'The value confirms this simulated shell is configured for ROS 2 Humble.',
+          'A different value can indicate another ROS distribution or a custom environment.'
+        ],
+        commonMistake: 'If the value is empty in a real terminal, verify the setup script exists and was sourced in that same terminal.',
+        roboticsUse: 'Verify the selected ROS distribution before building packages or debugging mismatched ROS environments.'
+      }
+    ]
+  }
 };

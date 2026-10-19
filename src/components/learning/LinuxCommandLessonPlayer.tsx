@@ -124,21 +124,31 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       <div className="command-hero-mark"><Terminal size={34}/><span>LEARN BY DOING</span></div>
     </div>
 
-    {lesson.id === 'linux-files' && <TerminalWalkthrough />}
-    {lesson.id === 'linux-files' && <PathPredictionPractice />}
-    {lesson.id === 'linux-files' && <FileOperationsPractice />}
-    {lesson.id === 'linux-files' && <FileReadingPractice />}
-    {lesson.id === 'linux-files' && <PipelinePractice />}
-    {lesson.id === 'linux-files' && <ProcessManagementPractice />}
-    {lesson.id === 'linux-files' && <TextSearchPractice />}
-    {lesson.id === 'linux-files' && <EnvironmentVariablesPractice />}
-    {lesson.id === 'linux-files' && <ShellStartupPractice />}
-    {lesson.id === 'linux-files' && <PackageSystemInspectionPractice />}
-    {lesson.id === 'linux-files' && <PermissionsPractice />}
-    {lesson.id === 'linux-files' && <UserGroupPractice />}
-    {lesson.id === 'linux-files' && <NetworkingPractice />}
-    {lesson.id === 'linux-files' && <SSHRemoteAccessPractice />}
-    {lesson.id === 'linux-files' && <LinuxServicesPractice />}
+    {lesson.id === 'linux-files' && <details className="linux-extra-practice">
+      <summary>
+        <span className="linux-extra-practice-icon"><Terminal size={19}/></span>
+        <span className="linux-extra-practice-summary"><b>Extra practice labs</b><small>Optional deep dives · Open one section when you are ready</small></span>
+        <span className="linux-extra-practice-count">15 labs</span>
+      </summary>
+      <div className="linux-extra-practice-content">
+        <p className="linux-extra-practice-intro">Finish the command walkthrough first. These focused labs are optional practice, grouped here so they do not interrupt the main lesson.</p>
+        <TerminalWalkthrough />
+        <PathPredictionPractice />
+        <FileOperationsPractice />
+        <FileReadingPractice />
+        <PipelinePractice />
+        <ProcessManagementPractice />
+        <TextSearchPractice />
+        <EnvironmentVariablesPractice />
+        <ShellStartupPractice />
+        <PackageSystemInspectionPractice />
+        <PermissionsPractice />
+        <UserGroupPractice />
+        <NetworkingPractice />
+        <SSHRemoteAccessPractice />
+        <LinuxServicesPractice />
+      </div>
+    </details>}
 
     <div className="command-progress">
       <div><span>COMMAND {String(stepIndex + 1).padStart(2, '0')} OF {String(steps.length).padStart(2, '0')}</span><b>{step.title}</b></div>

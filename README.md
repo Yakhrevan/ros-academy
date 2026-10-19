@@ -1,3 +1,19 @@
+<div align="center">
+
+# ROS Academy — Interactive Robotics Lab
+
+[![ROS 2 Humble](https://img.shields.io/badge/ROS%202-Humble-1F6FEB?style=for-the-badge&logo=ros&logoColor=white)](https://docs.ros.org/en/humble/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Robotics Learning](https://img.shields.io/badge/Robotics-Learning%20Platform-2563EB?style=for-the-badge)](https://github.com/Yakhrevan/ros-academy)
+
+**Explore robotics concepts through structured lessons, interactive visualizations, quizzes, and engineering learning paths.**
+
+[Repository](https://github.com/Yakhrevan/ros-academy) · [ROS 2 Notebook](https://github.com/Yakhrevan/ros2-robotics-engineering-notebook) · [Developer Portfolio](https://yakhrevan.github.io/Yakhrevan-Portfolio/)
+
+</div>
+
+---
+
 # ROS Academy — Interactive Robotics Lab
 
 A visual, gamified learning platform designed to teach robotics from Linux fundamentals through ROS 2 internals and industrial engineering.

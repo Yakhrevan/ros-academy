@@ -300,3 +300,27 @@
 .path-tree-segment small{color:#91bda9;font-size:9px}
 .path-tree>p{margin:9px 0 0;color:#b8c9dd;font-size:10px;line-height:1.7}
 .path-tree>p code{color:#a7cbff;font-family:'DM Mono',monospace}
+
+
+/* Interactive path prediction practice */
+.path-prediction-practice{margin:16px 0;padding:18px;border:1px solid #dbe6f4;border-radius:14px;background:#fff}
+.path-practice-context{display:grid;grid-template-columns:1fr;gap:5px;margin:12px 0;padding:12px;border-radius:9px;background:#13243a}
+.path-practice-context>span{margin-top:3px;color:#91b0d2;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.path-practice-context>code{padding:8px;border-radius:6px;background:#0c1929;color:#b5ffdc;font:11px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.path-practice-context>code.path-practice-command{color:#f1d18c}
+.path-practice-options{display:grid;gap:8px;margin:14px 0;padding:0;border:0}
+.path-practice-options legend{margin-bottom:8px;color:#263f5e;font-size:12px;font-weight:700}
+.path-practice-options label{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid #d8e3f0;border-radius:8px;background:#f8fbff;cursor:pointer;min-width:0}
+.path-practice-options label.selected{border-color:#4384d9;background:#eef6ff}
+.path-practice-options input{flex:0 0 auto;accent-color:#347de3}
+.path-practice-options code{color:#294768;font:11px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.path-practice-feedback{margin:12px 0;padding:12px;border:1px solid #d9e5f2;border-radius:9px;background:#f7faff}
+.path-practice-feedback.correct{border-color:#a6dcc2;background:#f0fbf5}
+.path-practice-feedback.incorrect{border-color:#e7cba1;background:#fff9ee}
+.path-practice-feedback>b{display:flex;align-items:center;gap:6px;color:#245b45;font-size:12px}
+.path-practice-feedback.incorrect>b{color:#805b20}
+.path-practice-feedback p{margin:8px 0 0;color:#4e637c;font-size:11px;line-height:1.75}
+.path-practice-feedback code{font-family:'DM Mono',monospace;color:#244e7e;overflow-wrap:anywhere}
+.path-practice-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.path-practice-controls button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+@media(max-width:520px){.path-prediction-practice{padding:13px}.path-practice-controls{display:grid;grid-template-columns:1fr}.path-practice-controls button{width:100%}}

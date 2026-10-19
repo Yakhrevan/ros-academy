@@ -171,3 +171,16 @@
 @keyframes walkthrough-blink{to{visibility:hidden}}
 @media(max-width:600px){.terminal-walkthrough{padding:13px}.walkthrough-controls{display:grid;grid-template-columns:1fr}.walkthrough-controls button{width:100%}.beginner-explanation{padding:13px}.beginner-explanation p{font-size:12px}.walkthrough-command{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.walkthrough-cursor{animation:none}.command-progress-track i{transition:none}}
+
+
+/* Keep command-level progression visually separate from lesson-level navigation */
+.command-step-navigation{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.command-step-navigation button{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.command-step-navigation button:disabled{opacity:.55;cursor:not-allowed}
+.command-bottom-navigation{display:grid;gap:10px;padding:15px;border:1px solid #dce6f2;border-radius:12px;background:#f7faff}
+.lesson-navigation-label{display:grid;gap:4px}
+.lesson-navigation-label b{font-size:12px;color:#1d3858}
+.lesson-navigation-label span{font-size:11px;line-height:1.6;color:#637991}
+.lesson-navigation-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.lesson-navigation-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px}
+@media(max-width:600px){.command-step-navigation,.lesson-navigation-actions{grid-template-columns:1fr}.lesson-navigation-label span{font-size:12px}}

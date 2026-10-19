@@ -62,6 +62,28 @@ function resolvePath(target: string, cwd: string): string {
   return normalizePath((cwd === '/' ? '' : cwd) + '/' + target);
 }
 
+function isDirectory(path: string): boolean {
+  return Object.prototype.hasOwnProperty.call(FS, path);
+}
+
+function pathExists(path: string): boolean {
+  if (path === '/' || isDirectory(path) || Object.prototype.hasOwnProperty.call(virtualFileContents, path)) return true;
+  const separator = path.lastIndexOf('/');
+  const parent = separator <= 0 ? '/' : path.slice(0, separator);
+  const name = path.slice(separator + 1);
+  return Boolean(FS[parent]?.includes(name));
+}
+
+function collectVirtualPaths(): string[] {
+  const paths = new Set<string>([...Object.keys(FS), ...Object.keys(virtualFileContents)]);
+  for (const [directory, entries] of Object.entries(FS)) {
+    for (const entry of entries) {
+      paths.add(normalizePath((directory === '/' ? '' : directory) + '/' + entry));
+    }
+  }
+  return [...paths];
+}
+
 function shellQuoteTrim(value: string): string {
   return value.replace(/^['"]|['"]$/g, '');
 }
@@ -149,11 +171,11 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
       const path = resolvePath(shellQuoteTrim(target), cwd);
       const name = path.split('/').pop() || '';
       const parent = path.slice(0, path.lastIndexOf('/')) || '/';
-      if (FS[path]) {
-        if (parents) continue;
+      if (pathExists(path)) {
+        if (parents && isDirectory(path)) continue;
         return { command, output: '', status: 'mkdir: cannot create directory: already exists: ' + path, cwd };
       }
-      if (!FS[parent]) return { command, output: '', status: 'mkdir: parent directory does not exist: ' + parent + '. Create or navigate to the parent first.', cwd };
+      if (!isDirectory(parent)) return { command, output: '', status: 'mkdir: parent directory does not exist: ' + parent, cwd };
       FS[path] = [];
       if (!FS[parent].includes(name)) FS[parent].push(name);
     }
@@ -162,15 +184,15 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
 
   if (/^touch\s+/.test(command)) {
     const targets = command.replace(/^touch\s+/, '').split(/\s+/);
+    if (!targets.length || targets[0] === '') return { command, output: '', status: 'Usage: touch FILE', cwd };
     for (const target of targets) {
       const path = resolvePath(shellQuoteTrim(target), cwd);
       const name = path.split('/').pop() || '';
       const parent = path.slice(0, path.lastIndexOf('/')) || '/';
-      if (!FS[parent]) return { command, output: '', status: 'touch: parent directory does not exist: ' + parent, cwd };
-      if (FS[path]) return { command, output: '', status: 'touch: this training simulator only creates new sample files; entry already exists: ' + path, cwd };
-      FS[path] = [];
+      if (!isDirectory(parent)) return { command, output: '', status: 'touch: parent directory does not exist: ' + parent, cwd };
+      if (pathExists(path)) return { command, output: '', status: 'touch: this training simulator only creates new sample files; entry already exists: ' + path, cwd };
       virtualFileContents[path] = '';
-      (FS[parent] ??= []).push(name);
+      if (!FS[parent].includes(name)) FS[parent].push(name);
     }
     return { command, output: '', status: 'Empty file created in the virtual training filesystem. Run ls to verify.', cwd };
   }
@@ -182,19 +204,42 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     const destination = resolvePath(shellQuoteTrim(args[1]), cwd);
     const sourceParent = source.slice(0, source.lastIndexOf('/')) || '/';
     const sourceName = source.split('/').pop() || '';
-    const destinationIsDirectory = !!FS[destination];
+    const sourceIsDirectory = isDirectory(source);
+    if (!FS[sourceParent]?.includes(sourceName) || !pathExists(source)) {
+      return { command, output: '', status: operation + ': source not found in virtual filesystem: ' + source, cwd };
+    }
+    const destinationIsDirectory = isDirectory(destination);
     const finalPath = destinationIsDirectory ? normalizePath(destination + '/' + sourceName) : destination;
     const finalParent = finalPath.slice(0, finalPath.lastIndexOf('/')) || '/';
     const finalName = finalPath.split('/').pop() || '';
-    if (!FS[sourceParent]?.includes(sourceName) || !Object.prototype.hasOwnProperty.call(FS, source)) return { command, output: '', status: operation + ': source not found in virtual filesystem: ' + source, cwd };
-    if (!FS[finalParent]) return { command, output: '', status: operation + ': destination parent does not exist: ' + finalParent, cwd };
-    if (FS[finalPath] || FS[finalParent].includes(finalName)) return { command, output: '', status: operation + ': destination already exists: ' + finalPath, cwd };
-    FS[finalPath] = [...(FS[source] ?? [])];
-    if (Object.prototype.hasOwnProperty.call(virtualFileContents, source)) virtualFileContents[finalPath] = virtualFileContents[source];
-    FS[finalParent].push(finalName);
+    if (!isDirectory(finalParent)) return { command, output: '', status: operation + ': destination parent does not exist: ' + finalParent, cwd };
+    if (pathExists(finalPath)) return { command, output: '', status: operation + ': destination already exists: ' + finalPath, cwd };
+    if (sourceIsDirectory && finalPath.startsWith(source + '/')) {
+      return { command, output: '', status: operation + ': cannot copy or move a directory into itself.', cwd };
+    }
+
+    if (sourceIsDirectory) {
+      const sourceDirectories = Object.keys(FS)
+        .filter((entry) => entry === source || entry.startsWith(source + '/'))
+        .sort((a, b) => a.length - b.length);
+      for (const directory of sourceDirectories) {
+        FS[finalPath + directory.slice(source.length)] = [...FS[directory]];
+      }
+      for (const [filePath, content] of Object.entries(virtualFileContents)) {
+        if (filePath.startsWith(source + '/')) virtualFileContents[finalPath + filePath.slice(source.length)] = content;
+      }
+    } else {
+      virtualFileContents[finalPath] = virtualFileContents[source] ?? '';
+    }
+    if (!FS[finalParent].includes(finalName)) FS[finalParent].push(finalName);
+
     if (operation === 'mv') {
-      delete FS[source];
-      delete virtualFileContents[source];
+      if (sourceIsDirectory) {
+        Object.keys(FS).filter((entry) => entry === source || entry.startsWith(source + '/')).forEach((entry) => delete FS[entry]);
+        Object.keys(virtualFileContents).filter((entry) => entry.startsWith(source + '/')).forEach((entry) => delete virtualFileContents[entry]);
+      } else {
+        delete virtualFileContents[source];
+      }
       FS[sourceParent] = FS[sourceParent].filter((entry) => entry !== sourceName);
     }
     return { command, output: '', status: operation === 'cp' ? 'Copied the entry in the virtual training filesystem.' : 'Moved/renamed the entry in the virtual training filesystem.', cwd };
@@ -204,18 +249,25 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     const args = command.replace(/^rm\s+/, '').split(/\s+/);
     const recursive = args[0] === '-r' || args[0] === '-rf' || args[0] === '-fr';
     const targets = recursive ? args.slice(1) : args;
+    if (!targets.length || targets[0] === '') return { command, output: '', status: 'Usage: rm [-r] PATH', cwd };
     for (const target of targets) {
       const path = resolvePath(shellQuoteTrim(target), cwd);
       const name = path.split('/').pop() || '';
       const parent = path.slice(0, path.lastIndexOf('/')) || '/';
-      if (!FS[parent]?.includes(name) || !Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'rm: cannot remove: no such entry in virtual filesystem: ' + path, cwd };
-      if (FS[path].length && !recursive) return { command, output: '', status: 'rm: cannot remove ' + path + ': is a directory. This simulator requires rm -r for directories; inspect carefully before using it.', cwd };
-      if (recursive) {
+      if (!isDirectory(parent) || !FS[parent].includes(name) || !pathExists(path)) {
+        return { command, output: '', status: 'rm: cannot remove: no such entry in virtual filesystem: ' + path, cwd };
+      }
+      if (isDirectory(path) && !recursive) {
+        return { command, output: '', status: 'rm: cannot remove ' + path + ': is a directory. This simulator requires rm -r for directories; inspect carefully before using it.', cwd };
+      }
+      if (isDirectory(path)) {
         const prefix = path + '/';
         Object.keys(FS).filter((entry) => entry === path || entry.startsWith(prefix)).forEach((entry) => delete FS[entry]);
         Object.keys(virtualFileContents).filter((entry) => entry === path || entry.startsWith(prefix)).forEach((entry) => delete virtualFileContents[entry]);
-      } else { delete FS[path]; delete virtualFileContents[path]; }
-      FS[parent] = (FS[parent] ?? []).filter((entry) => entry !== name);
+      } else {
+        delete virtualFileContents[path];
+      }
+      FS[parent] = FS[parent].filter((entry) => entry !== name);
     }
     return { command, output: '', status: 'Entry removed from the virtual training filesystem only. Verify with ls.', cwd };
   }
@@ -227,14 +279,14 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     const targetPath = targets.length ? resolvePath(targets[0], cwd) : cwd;
     const all = flags.some((flag) => flag.includes('a'));
     const detailed = flags.some((flag) => flag.includes('l'));
-    if (!Object.prototype.hasOwnProperty.call(FS, targetPath)) return { command, output: '', status: 'ls: cannot access ' + targetPath + ': no such entry in the virtual filesystem.', cwd };
-    if (!FS[targetPath]) {
+    if (!pathExists(targetPath)) return { command, output: '', status: 'ls: cannot access ' + targetPath + ': no such entry in the virtual filesystem.', cwd };
+    if (!isDirectory(targetPath)) {
       const name = targetPath.split('/').pop() || targetPath;
       return { command, output: detailed ? '-rw-r--r-- 1 student student 0 ' + name : name, status: 'Listed the requested virtual file. The working directory did not change.', cwd };
     }
     const entries = directoryEntries(targetPath, all);
     if (detailed) {
-      const rows = entries.map((entry) => (FS[normalizePath(targetPath + '/' + entry)] ? 'drwxr-xr-x' : '-rw-r--r--') + '  student student  ' + entry);
+      const rows = entries.map((entry) => (isDirectory(normalizePath(targetPath + '/' + entry)) ? 'drwxr-xr-x' : '-rw-r--r--') + '  student student  ' + entry);
       return { command, output: '.  ..\n' + rows.join('\n'), status: 'Listed virtual directory entries with simplified illustrative metadata.', cwd };
     }
     return { command, output: entries.join('  ') || '(empty directory)', status: 'Listed entries in ' + targetPath + '. The working directory did not change.', cwd };
@@ -277,18 +329,15 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     const path = resolvePath(target, cwd);
     const parent = path.slice(0, path.lastIndexOf('/')) || '/';
     const name = path.split('/').pop() || '';
-    if (!Object.prototype.hasOwnProperty.call(FS, parent) || !FS[parent]) return { command, output: '', status: 'bash: cannot redirect to a path whose parent directory does not exist: ' + parent, cwd };
-    if (FS[path]) return { command, output: '', status: 'bash: cannot overwrite a directory: ' + path, cwd };
+    if (!isDirectory(parent)) return { command, output: '', status: 'bash: cannot redirect to a path whose parent directory does not exist: ' + parent, cwd };
+    if (isDirectory(path)) return { command, output: '', status: 'bash: cannot overwrite a directory: ' + path, cwd };
     let content = '';
     if (left.startsWith('echo ')) content = left.slice(5).replace(/^['"]|['"]$/g, '') + '\n';
     else if (left.startsWith('printf ')) {
       const quoted = left.slice(7).trim().replace(/^['"]|['"]$/g, '');
       content = quoted.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
     } else return { command, output: '', status: 'This simulator supports redirection with echo and printf only. Example: echo hello > notes.txt', cwd };
-    if (!Object.prototype.hasOwnProperty.call(FS, path)) {
-      FS[path] = [];
-      if (!FS[parent].includes(name)) FS[parent].push(name);
-    }
+    if (!pathExists(path) && !FS[parent].includes(name)) FS[parent].push(name);
     virtualFileContents[path] = append ? (virtualFileContents[path] || '') + content : content;
     return { command, output: '', status: (append ? 'Appended to ' : 'Wrote ') + path + ' in the virtual filesystem only. Read it with cat to verify.', cwd };
   }
@@ -303,9 +352,9 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     if (!pattern) return { command, output: '', status: 'Usage: cat FILE | grep PATTERN', cwd };
     let input = '';
     if (source.startsWith('cat ')) {
-      const path = resolvePath(source.slice(4).trim().replace(/^['"]|['"]$/g, ''), cwd);
-      if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd };
-      if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd };
+      const path = resolvePath(source.slice(4).trim().replace(/^['\"]|['\"]$/g, ''), cwd);
+      if (!pathExists(path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd };
+      if (isDirectory(path)) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd };
       input = virtualFileContents[path] ?? '';
     } else if (source.startsWith('printf ')) {
       input = source.slice(7).trim().replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
@@ -323,8 +372,8 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     if (args.length < 2) return { command, output: '', status: 'Usage: grep PATTERN FILE', cwd };
     const pattern = args[0].replace(/^['"]|['"]$/g, '');
     const path = resolvePath(args[1].replace(/^['"]|['"]$/g, ''), cwd);
-    if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'grep: no such file in virtual filesystem: ' + path, cwd };
-    if (FS[path]) return { command, output: '', status: 'grep: ' + path + ': is a directory', cwd };
+    if (!pathExists(path)) return { command, output: '', status: 'grep: no such file in virtual filesystem: ' + path, cwd };
+    if (isDirectory(path)) return { command, output: '', status: 'grep: ' + path + ': is a directory', cwd };
     const matches = (virtualFileContents[path] || '').split(/\r?\n/).filter((line) => line.includes(pattern));
     return { command, output: matches.join('\n'), status: matches.length ? 'Filtered virtual file content; no host files were read.' : 'No matching lines found.', cwd };
   }
@@ -333,10 +382,11 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     const nameIndex = args.indexOf('-name');
     if (nameIndex < 1 || !args[nameIndex + 1]) return { command, output: '', status: 'Usage: find PATH -name PATTERN', cwd };
     const root = resolvePath(args[0], cwd);
-    if (!Object.prototype.hasOwnProperty.call(FS, root)) return { command, output: '', status: 'find: starting path does not exist in the virtual filesystem: ' + root, cwd };
+    if (!pathExists(root)) return { command, output: '', status: 'find: starting path does not exist in the virtual filesystem: ' + root, cwd };
+    if (!isDirectory(root)) return { command, output: '', status: 'find: starting path is not a directory: ' + root, cwd };
     const pattern = args[nameIndex + 1].replace(/^['"]|['"]$/g, '');
     const matches: string[] = [];
-    const candidates = [...new Set([...Object.keys(FS), ...Object.keys(virtualFileContents)])];
+    const candidates = collectVirtualPaths();
     for (const path of candidates) {
       if (path !== root && !path.startsWith(root === '/' ? '/' : root + '/')) continue;
       const name = path.split('/').pop() || '/';
@@ -345,7 +395,14 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     }
     return { command, output: matches.join('\n') || '(no matches)', status: 'Searched only the virtual training filesystem; no host files were accessed.', cwd };
   }
-  if (command.startsWith('cat ')) { const target = command.slice(4).trim().replace(/^['\"]|['\"]$/g, ''); const path = resolvePath(target, cwd); if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd }; if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd }; return { command, output: virtualFileContents[path] ?? '', status: 'Read virtual file contents only; no host files were accessed.', cwd }; }
+  if (command.startsWith('cat ')) {
+    const target = command.slice(4).trim().replace(/^['\"]|['\"]$/g, '');
+    const path = resolvePath(target, cwd);
+    if (!pathExists(path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd };
+    if (isDirectory(path)) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd };
+    return { command, output: virtualFileContents[path] ?? '', status: 'Read virtual file contents only; no host files were accessed.', cwd };
+  }
+
   if (command === 'getent hosts github.com') return { command, output: '140.82.112.3 github.com (illustrative)', status: 'Illustrative name-resolution result; no DNS lookup occurred.', cwd };
   if (command.startsWith('ssh ')) return { command, output: 'robot@amr:~$ (simulated remote prompt)', status: 'No network connection or authentication was attempted.', cwd };
   if (command.startsWith('ros2 ')) {

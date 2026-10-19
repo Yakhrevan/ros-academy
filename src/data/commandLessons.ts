@@ -550,5 +550,84 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         roboticsUse: 'Locate ROS package manifests, launch files, URDF/Xacro assets or configuration files before inspecting or building a workspace.'
       }
     ]
+  },,
+
+  'linux-pipelines': {
+    lessonId: 'linux-pipelines',
+    intro: 'Combine small shell tools to filter diagnostic text, then save results to the virtual workspace using redirection.',
+    mentalModel: 'A pipe connects the output stream of one command to the input stream of another. Redirection sends output to a file. In a real shell, these are operating-system streams; in this lesson they are represented by a safe in-memory simulator.',
+    steps: [
+      {
+        id: 'printf-pipe-grep',
+        title: 'Filter a stream with a pipe',
+        command: 'printf "node\\nros2\\nlinux\\n" | grep ros2',
+        purpose: 'Generate sample lines and keep only the line matching ros2.',
+        syntax: 'printf TEXT | grep PATTERN',
+        tokens: [
+          { token: 'printf', role: 'command 1', meaning: 'Writes formatted text to standard output.' },
+          { token: '|', role: 'pipe', meaning: 'Connects the left command output to the right command input.' },
+          { token: 'grep ros2', role: 'command 2', meaning: 'Keeps lines containing the pattern ros2.' }
+        ],
+        howItWorks: [
+          'printf generates three lines of sample text.',
+          'The pipe passes that text to grep instead of printing it directly as the final result.',
+          'grep emits only the matching line.'
+        ],
+        expectedOutput: 'ros2',
+        outputMeaning: [
+          'Only the line containing ros2 remains in the filtered output.',
+          'A pipeline combines tools without requiring an intermediate file.'
+        ],
+        commonMistake: 'A pipe is not the same as > redirection. A pipe connects commands; > writes output to a file.',
+        roboticsUse: 'Filter long diagnostic output for a specific ROS package, node name or hardware event.'
+      },
+      {
+        id: 'write-virtual-file',
+        title: 'Redirect output into a file',
+        command: 'printf "robot ready\\n" > status.txt',
+        purpose: 'Write text into a file in the virtual training filesystem.',
+        syntax: 'printf TEXT > FILE',
+        tokens: [
+          { token: 'printf', role: 'command', meaning: 'Produces text output.' },
+          { token: '>', role: 'redirection operator', meaning: 'Creates or replaces the destination file contents in a real shell.' },
+          { token: 'status.txt', role: 'destination', meaning: 'A file path relative to the current virtual directory.' }
+        ],
+        howItWorks: [
+          'The shell interprets the redirection before running the command.',
+          'Standard output is sent to status.txt instead of the terminal.',
+          'In this training simulator, only the in-memory virtual file changes.'
+        ],
+        expectedOutput: '(no terminal output; text is written to status.txt)',
+        outputMeaning: [
+          'No terminal text is expected when stdout is redirected to a file.',
+          'Run cat status.txt to inspect the simulated contents.'
+        ],
+        commonMistake: 'A single > replaces previous file content; >> appends. Verify the target path before using redirection on a real system.',
+        roboticsUse: 'Capture a concise diagnostic summary or generate a small configuration file in a controlled workspace.'
+      },
+      {
+        id: 'read-virtual-file',
+        title: 'Verify redirected content',
+        command: 'cat status.txt',
+        purpose: 'Read back the text written by the previous step.',
+        syntax: 'cat FILE',
+        tokens: [
+          { token: 'cat', role: 'command', meaning: 'Writes file contents to standard output.' },
+          { token: 'status.txt', role: 'argument', meaning: 'The file created by the preceding simulated redirection.' }
+        ],
+        howItWorks: [
+          'The simulator resolves status.txt relative to the current directory.',
+          'It reads the stored virtual content.',
+          'The text is displayed in the terminal output.'
+        ],
+        expectedOutput: 'robot ready',
+        outputMeaning: [
+          'The file contains the line written by printf.',
+          'This confirms the simulator preserves content across commands in the same application session.'
+        ],
+        commonMistake: 'If the file is missing, check the current directory with pwd and list entries with ls.',
+        roboticsUse: 'Always verify generated configuration and diagnostic output before using it in a real deployment workflow.'
+      }
+    ]
   },
 };

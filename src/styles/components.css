@@ -526,3 +526,27 @@
 .startup-explanation>b{color:#203d5d;font-size:12px}
 .startup-explanation code{color:#285b92;font-family:'DM Mono',monospace;overflow-wrap:anywhere}
 @media(max-width:560px){.shell-startup-practice{padding:12px}.startup-file-head{flex-direction:column}.startup-file-type{max-width:100%;text-align:left}.startup-state-row{grid-template-columns:1fr;gap:5px}.startup-state-row>span:last-child{width:fit-content}.startup-state-actions{display:grid;grid-template-columns:1fr}.startup-state-actions button{width:100%}}
+
+
+/* Deep Bash startup file reference and troubleshooting */
+.startup-deep-dive{display:grid;gap:12px;margin:14px 0}
+.startup-deep-dive h3{margin:8px 0 0;color:#203d5d;font-size:14px}
+.startup-deep-dive>p,.startup-deep-dive li{color:#506780;font-size:11px;line-height:1.9}
+.startup-deep-dive code{color:#285b92;font-family:'DM Mono',monospace;overflow-wrap:anywhere}
+.startup-concept-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.startup-concept-grid article{padding:11px;border:1px solid #dbe6f4;border-radius:8px;background:#f7faff}
+.startup-concept-grid b{color:#2b527b;font-size:11px}
+.startup-concept-grid p{margin:7px 0 0;color:#5b7088;font-size:10px;line-height:1.8}
+.startup-matrix{overflow-x:auto;border:1px solid #dbe6f4;border-radius:8px}
+.startup-matrix>div{display:grid;grid-template-columns:minmax(140px,.9fr) minmax(150px,1fr) minmax(210px,1.4fr);min-width:590px}
+.startup-matrix>div>*{padding:9px;border-bottom:1px solid #e2eaf4;color:#536982;font-size:10px;line-height:1.7}
+.startup-matrix>div>b{background:#eaf3fc;color:#2b527b;font-size:9px;text-transform:uppercase;letter-spacing:.04em}
+.startup-matrix>div>span:nth-child(3n+1){background:#f8fbff}
+.startup-important{display:flex;align-items:flex-start;gap:8px;padding:11px;border:1px solid #e6c58c;border-radius:8px;background:#fff7e8}
+.startup-important svg{flex:0 0 auto;margin-top:2px;color:#986b2d}
+.startup-important p{margin:0;color:#785a24;font-size:10px;line-height:1.8}
+.startup-diagnostic{margin:0;padding:12px;overflow-x:auto;border:1px solid #2b4059;border-radius:8px;background:#101c2c;color:#b5ffdc;font:10px/1.9 'DM Mono',monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.startup-diagnostic-note{margin:0!important;padding:9px;border-radius:7px;background:#f1f6fc;color:#5a708a!important;font-size:10px!important}
+.startup-deep-dive ol{padding-left:20px}
+.startup-deep-dive li{padding-left:3px;margin:4px 0}
+@media(max-width:600px){.startup-concept-grid{grid-template-columns:1fr}.startup-deep-dive h3{font-size:13px}.startup-matrix>div{min-width:560px}}

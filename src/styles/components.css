@@ -767,3 +767,30 @@
 .services-feedback svg{flex:0 0 auto}
 .services-quick-reference pre{padding:10px;border-radius:7px;background:#101c2c;color:#b5ffdc;font:10px/1.8 'DM Mono',monospace;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:560px){.linux-services-practice{padding:12px}.services-terminal-bar{font-size:7px}.services-breakdown>div{grid-template-columns:1fr;gap:4px}.services-actions{display:grid;grid-template-columns:1fr}.services-actions button{width:100%}}
+
+
+/* Linux file search and log inspection */
+.text-search-practice{margin:18px 0;padding:18px;border:1px solid #dbe6f4;border-radius:14px;background:#fff}
+.text-search-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.text-search-tabs button{padding:8px 10px;border:1px solid #d7e3f0;border-radius:7px;background:#f7faff;color:#365674;font:10px 'DM Mono',monospace;cursor:pointer}
+.text-search-tabs button.active{border-color:#347fd3;background:#eaf4ff;color:#1e5793}
+.text-search-terminal{overflow:hidden;border:1px solid #2b4059;border-radius:10px;background:#101c2c;color:#e5efff}
+.text-search-bar{display:flex;justify-content:space-between;gap:8px;padding:10px;background:#1b2c42;border-bottom:1px solid #2b4059;color:#9fb8d5;font-size:8px}
+.text-search-command{display:flex;gap:9px;padding:12px;border-bottom:1px solid #2b4059;color:#8fe0b8}
+.text-search-command code{color:#fff;font:11px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.text-search-filter{display:flex;align-items:center;gap:7px;margin:10px;padding:8px;border:1px solid #3d5877;border-radius:7px;color:#9eb7d4;font-size:10px}
+.text-search-filter input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#e5efff;font:11px 'DM Mono',monospace}
+.text-search-output{min-height:70px;margin:0;padding:13px;color:#b5ffdc;font:10px/1.8 'DM Mono',monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.text-search-actions{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border-top:1px solid #2b4059}
+.text-search-actions button{font-size:10px}
+.text-search-breakdown{display:grid;gap:6px;padding:0 10px 10px}
+.text-search-breakdown>div{display:grid;grid-template-columns:minmax(100px,.8fr) minmax(0,1.5fr);gap:8px;padding:8px;border:1px solid #304963;border-radius:6px;background:#172940}
+.text-search-breakdown code{color:#b5ffdc;font:10px 'DM Mono',monospace;overflow-wrap:anywhere}
+.text-search-breakdown span{color:#b8c9dd;font-size:10px;line-height:1.6}
+.text-search-explanation{margin-top:12px;padding:12px;border:1px solid #dbe6f4;border-radius:9px;background:#f7faff}
+.text-search-explanation>b{color:#203d5d;font-size:12px}
+.text-search-explanation>p{color:#506780;font-size:11px;line-height:1.8}
+.text-search-explanation button{font-size:10px}
+.text-search-feedback{display:flex;align-items:flex-start;gap:7px;margin:10px 0 0;padding:9px;border:1px solid #b9e0cb;border-radius:7px;background:#f0fbf5;color:#2f6d50;font-size:10px;line-height:1.8}
+.text-search-feedback svg{flex:0 0 auto}
+@media(max-width:560px){.text-search-practice{padding:12px}.text-search-bar{font-size:7px}.text-search-breakdown>div{grid-template-columns:1fr;gap:4px}.text-search-actions{display:grid;grid-template-columns:1fr}.text-search-actions button{width:100%}}

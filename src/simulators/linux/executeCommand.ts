@@ -1,0 +1,137 @@
+import type { CommandStep } from '../../types/commandLesson';
+
+export type TerminalResult = {
+  command: string;
+  output: string;
+  status: string;
+  cwd: string;
+};
+
+type SimulatedFileSystem = Record<string, string[]>;
+
+const FS: SimulatedFileSystem = {
+  '/': ['bin', 'dev', 'etc', 'home', 'opt', 'tmp', 'usr', 'var'],
+  '/home': ['student'],
+  '/home/student': ['.bashrc', 'Desktop', 'Documents', 'projects', 'ros2_ws'],
+  '/home/student/Desktop': [],
+  '/home/student/Documents': ['notes.txt'],
+  '/home/student/projects': ['robot-dashboard', 'sensor-tools'],
+  '/home/student/ros2_ws': ['README.md', 'build', 'install', 'log', 'src'],
+  '/home/student/ros2_ws/build': [],
+  '/home/student/ros2_ws/install': ['setup.bash'],
+  '/home/student/ros2_ws/log': [],
+  '/home/student/ros2_ws/src': ['demo_robot', 'my_robot_bringup'],
+  '/home/student/ros2_ws/src/demo_robot': ['package.xml', 'src', 'launch', 'config'],
+  '/home/student/ros2_ws/src/my_robot_bringup': ['package.xml', 'launch', 'config'],
+  '/etc': ['hostname', 'hosts', 'network'],
+  '/dev': ['null', 'ttyUSB0', 'video0'],
+  '/opt': ['ros'],
+  '/opt/ros': ['humble'],
+  '/opt/ros/humble': ['bin', 'setup.bash', 'share'],
+  '/tmp': [],
+  '/usr': ['bin', 'lib', 'share'],
+  '/var': ['log', 'tmp']
+};
+
+function normalizePath(path: string): string {
+  const parts: string[] = [];
+  path.split('/').forEach((part) => {
+    if (!part || part === '.') return;
+    if (part === '..') parts.pop();
+    else parts.push(part);
+  });
+  return '/' + parts.join('/');
+}
+
+function resolvePath(target: string, cwd: string): string {
+  if (target === '~') return '/home/student';
+  if (target.startsWith('~/')) return normalizePath('/home/student/' + target.slice(2));
+  if (target.startsWith('/')) return normalizePath(target);
+  return normalizePath((cwd === '/' ? '' : cwd) + '/' + target);
+}
+
+function shellQuoteTrim(value: string): string {
+  return value.replace(/^['"]|['"]$/g, '');
+}
+
+function directoryEntries(cwd: string, all = false): string[] {
+  const entries = FS[cwd] ?? [];
+  return all ? entries : entries.filter((entry) => !entry.startsWith('.'));
+}
+
+export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): TerminalResult {
+  const command = raw.trim();
+  if (!command) return { command, output: '', status: 'Type a command first.', cwd };
+
+  if (command === 'clear') return { command, output: '', status: 'Terminal output cleared.', cwd };
+  if (command === 'pwd') return { command, output: cwd, status: 'Printed the current working directory. No state changed.', cwd };
+  if (command === 'whoami') return { command, output: 'student', status: 'Displayed the current simulated user.', cwd };
+  if (command === 'echo $PWD') return { command, output: cwd, status: 'Expanded PWD in the current simulated shell.', cwd };
+  if (command === 'echo $HOME') return { command, output: '/home/student', status: 'Expanded HOME in the current simulated shell.', cwd };
+  if (command === 'echo $ROS_DISTRO') return { command, output: 'humble (simulated)', status: 'Illustrative environment variable; not read from your device.', cwd };
+  if (command === 'echo $PATH') return { command: command, output: '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin', status: 'Printed the simulated PATH variable.', cwd };
+  if (command.startsWith('echo ')) return { command, output: shellQuoteTrim(command.slice(5)), status: 'echo writes the supplied text to stdout.', cwd };
+
+  if (command === 'cd' || command === 'cd ~') return { command, output: '', status: 'Directory changed to /home/student. Successful cd normally prints no stdout.', cwd: '/home/student' };
+  if (command.startsWith('cd ')) {
+    const target = command.slice(3).trim();
+    const next = resolvePath(target, cwd);
+    if (!FS[next]) return { command, output: '', status: 'No such directory in the virtual filesystem: ' + next, cwd };
+    return { command, output: '', status: 'Directory changed to ' + next + '. Run pwd to verify it.', cwd: next };
+  }
+
+  if (command === 'ls' || command === 'ls -a' || command === 'ls -la' || command === 'ls -al') {
+    const entries = directoryEntries(cwd, command !== 'ls');
+    if (command === 'ls -la' || command === 'ls -al') {
+      const rows = entries.map((entry) => (FS[normalizePath(cwd + '/' + entry)] ? 'drwxr-xr-x' : '-rw-r--r--') + '  student student  ' + entry);
+      return { command, output: '.  ..\n' + rows.join('\n'), status: 'Listed directory entries and simplified metadata. Sample permissions are illustrative.', cwd };
+    }
+    return { command, output: entries.join('  ') || '(empty directory)', status: 'Listed entries in ' + cwd + '. The working directory did not change.', cwd };
+  }
+
+  if (command.startsWith('cd ')) return { command, output: '', status: 'Directory command processed.', cwd };
+
+  if (command === 'ls -l deploy.sh') return { command, output: '-rw-r--r-- 1 student student 128 deploy.sh', status: 'Illustrative metadata only.', cwd };
+  if (command === 'chmod u+x deploy.sh') return { command, output: '', status: 'Simulated only: owner execute bit added for the lesson; no real file was modified.', cwd };
+  if (command === 'ps -ef' || command === 'ps aux') return { command, output: 'UID  PID  COMMAND\nroot  1    systemd\nstudent 721 bash\nstudent 1042 demo_node (simulated)', status: 'Process listing is fabricated for training; no host processes were inspected.', cwd };
+  if (command === 'kill -TERM 1042' || command === 'kill -TERM <pid>') return { command, output: '', status: 'Simulated SIGTERM request for demo_node. No real process was signalled.', cwd };
+  if (command === 'free -h') return { command, output: 'Mem: 7.7Gi total  1.8Gi used  4.1Gi free (simulated)', status: 'Invented memory values; no machine metrics were queried.', cwd };
+  if (command === 'uptime') return { command, output: '08:12:34 up 3 days, 4:21, 2 users, load average: 0.32, 0.27, 0.21 (illustrative)', status: 'Illustrative uptime/load values, not measurements from your device.', cwd };
+  if (command === 'who -b') return { command, output: 'system boot  2026-10-16 03:51 (illustrative)', status: 'Illustrative boot timestamp.', cwd };
+  if (command === 'systemd-analyze time') return { command, output: 'Startup finished in 4.2s (firmware) + 1.1s (loader) + 2.8s (kernel) + 7.4s (userspace) = 15.5s (illustrative)', status: 'Timing components depend on actual firmware and system support.', cwd };
+  if (command === 'systemd-analyze blame | head') return { command, output: '4.2s NetworkManager-wait-online.service\n2.1s robot-bringup.service\n1.4s systemd-udev-settle.service (illustrative)', status: 'Illustrative services and timings.', cwd };
+  if (command === 'systemctl get-default') return { command, output: 'graphical.target (illustrative)', status: 'Example default target, not queried from your computer.', cwd };
+  if (command === 'systemctl --failed') return { command, output: '0 loaded units listed (illustrative)', status: 'No actual systemd manager was queried.', cwd };
+  if (command.startsWith('systemctl status ')) return { command, output: command.split(' ').at(-1) + ' - service (simulated status)', status: 'Simulated service state only.', cwd };
+  if (command.startsWith('journalctl')) return { command, output: 'Oct 19 08:01:03 robot-lab systemd[1]: illustrative service message', status: 'Illustrative journal line; no system logs were read.', cwd };
+  if (command.startsWith('systemd-analyze blame')) return { command, output: '2.1s robot-bringup.service\n1.4s systemd-udev-settle.service (illustrative)', status: 'Illustrative boot timing.', cwd };
+  if (command === 'ip addr' || command === 'ip address show') return { command, output: 'lo: 127.0.0.1/8\nwlan0: 192.168.1.42/24 (illustrative)', status: 'Example interfaces; no network state was queried.', cwd };
+  if (command === 'ip route' || command === 'ip route show') return { command, output: 'default via 192.168.1.1 dev wlan0\n192.168.1.0/24 dev wlan0 (illustrative)', status: 'Example routes only.', cwd };
+  if (command === 'ip link' || command === 'ip link show') return { command, output: '1: lo: <LOOPBACK,UP>\n2: enp2s0: <BROADCAST,MULTICAST,UP>\n3: can0: <NOARP> (illustrative)', status: 'Example interface names; CAN requires device support/configuration.', cwd };
+  if (command === 'lsblk' || command.startsWith('lsblk ')) return { command, output: 'NAME        SIZE FSTYPE TYPE MOUNTPOINTS\nnvme0n1   238G        disk\n├─nvme0n1p1 512M vfat part /boot/efi\n└─nvme0n1p2 237G ext4 part / (illustrative)', status: 'Example block-device information.', cwd };
+  if (command === 'lsusb') return { command, output: 'Bus 001 Device 002: USB-serial adapter (illustrative)\nBus 001 Device 003: depth camera (illustrative)', status: 'Example USB devices, not attached hardware.', cwd };
+  if (command === 'lspci') return { command, output: '00:14.0 USB controller (illustrative)\n01:00.0 Ethernet controller (illustrative)', status: 'Example PCI devices.', cwd };
+  if (command === 'efibootmgr -v') return { command, output: 'BootCurrent: 0001 (illustrative)\nBootOrder: 0001,0003,0000\nBoot0001* ubuntu HD(...)\\EFI\\ubuntu\\shimx64.efi', status: 'Read-only example for supported UEFI systems; not your actual firmware.', cwd };
+  if (command === 'dmesg') return { command, output: '[  1.234] usb 1-2: new high-speed USB device (illustrative)\n[  2.120] ttyUSB0: USB serial device (illustrative)', status: 'Illustrative kernel messages.', cwd };
+  if (command.startsWith('dmesg | grep')) return { command, output: '[  1.234] usb 1-2: new high-speed USB device (illustrative)\n[  2.120] ttyUSB0: USB serial device (illustrative)', status: 'Simulated pipeline output; no kernel messages were read.', cwd };
+  if (command.startsWith('printf ') && command.includes('| grep ros2')) return { command, output: 'ros2', status: 'The virtual pipeline filtered out non-matching lines.', cwd };
+  if (command.startsWith('sudo apt update')) return { command, output: 'Reading package lists... Done (simulated)', status: 'No package manager was run.', cwd };
+  if (command.startsWith('sudo apt install ')) return { command, output: 'Simulated package installation preview; nothing was installed.', status: 'No package manager was run.', cwd };
+  if (command === 'source /opt/ros/humble/setup.bash') return { command, output: '', status: 'Simulated: the lesson environment now treats ROS_DISTRO as humble; no host shell environment changed.', cwd };
+  if (command === 'echo $ROS_DISTRO') return { command, output: 'humble (simulated)', status: 'Training environment only.', cwd };
+  if (command === 'cat README.md' || command === 'cat notes.txt') return { command, output: command === 'cat README.md' ? '# Robot workspace\nA simulated ROS 2 learning project.' : '', status: 'Read from the virtual training filesystem.', cwd };
+  if (command === 'getent hosts github.com') return { command, output: '140.82.112.3 github.com (illustrative)', status: 'Illustrative name-resolution result; no DNS lookup occurred.', cwd };
+  if (command.startsWith('ssh ')) return { command, output: 'robot@amr:~$ (simulated remote prompt)', status: 'No network connection or authentication was attempted.', cwd };
+  if (command.startsWith('ros2 ')) {
+    const lesson = steps.find((step) => step.command === command);
+    if (lesson) return { command, output: lesson.expectedOutput, status: 'Illustrative ROS CLI output.', cwd };
+    if (command === 'ros2 node list') return { command, output: '/sensor_node\n/display_node', status: 'Example node names; no ROS graph was queried.', cwd };
+    if (command === 'ros2 topic list') return { command, output: '/parameter_events\n/rosout\n/temperature', status: 'Example topic names; no ROS graph was queried.', cwd };
+    return { command, output: 'Supported ROS command shown as a learning example.', status: 'No live ROS runtime is connected to this browser.', cwd };
+  }
+
+  const sampleStep = steps.find((step) => step.command === command);
+  if (sampleStep) return { command, output: sampleStep.expectedOutput, status: 'Sample output for this lesson; see the explanation above.', cwd };
+
+  return { command, output: '', status: 'Command not implemented in this training shell. It was not run on your computer. Type help to view the lesson scope.', cwd };
+}

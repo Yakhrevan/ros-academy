@@ -892,3 +892,7 @@
 .dashboard-resume-copy>b{color:#203c5b;font-size:13px}
 .dashboard-resume-copy>small{color:#71839a;font-size:10px;line-height:1.6}
 @media(max-width:700px){.dashboard-progress-overview{padding:16px}.dashboard-progress-heading{flex-direction:column;gap:10px}.dashboard-progress-metrics{grid-template-columns:1fr 1fr}.dashboard-progress-metrics>div:first-child{grid-column:1/-1}.dashboard-progress-metrics>div>b{font-size:21px}.dashboard-resume-row{align-items:stretch;flex-direction:column}.dashboard-resume-row .button-primary{justify-content:center;width:100%}}
+
+.lesson-completion-requirement{margin:12px 0 8px;padding:10px 12px;border-radius:9px;background:#f1f6fd;color:#48627e;font-size:10px;line-height:1.65}
+.lesson-completion-requirement:has(+ .command-complete-button:disabled){border:1px solid #e0e9f5}
+.command-complete-button:disabled{opacity:.55;cursor:not-allowed}

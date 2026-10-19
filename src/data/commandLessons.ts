@@ -707,7 +707,7 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         roboticsUse: 'Verify shutdown before relaunching a ROS node to avoid duplicated publishers, device contention or multiple control loops.'
       }
     ]
-  },,
+  },
 
   'linux-env-ros': {
     lessonId: 'linux-env-ros',

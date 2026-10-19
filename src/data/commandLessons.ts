@@ -629,5 +629,83 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         roboticsUse: 'Always verify generated configuration and diagnostic output before using it in a real deployment workflow.'
       }
     ]
+  },,
+
+  'linux-process-state': {
+    lessonId: 'linux-process-state',
+    intro: 'Inspect a simulated process table, request graceful termination, and verify the state change rather than trusting a command message.',
+    mentalModel: 'ps takes a snapshot of processes. kill sends a signal to a PID; it does not mean “force kill” by default. SIGTERM asks a process to terminate gracefully, while SIGKILL is an uncatchable last resort. Here the process table is simulated and cannot affect your machine.',
+    steps: [
+      {
+        id: 'list-processes',
+        title: 'Inspect the process table',
+        command: 'ps -ef',
+        purpose: 'Find the PID and command name of a running process.',
+        syntax: 'ps -ef',
+        tokens: [
+          { token: 'ps', role: 'command', meaning: 'Prints a snapshot of process information.' },
+          { token: '-e', role: 'option', meaning: 'Selects all processes visible to the caller.' },
+          { token: '-f', role: 'option', meaning: 'Uses a full-format listing with extra columns.' }
+        ],
+        howItWorks: [
+          'Linux exposes process metadata through its process-information interfaces.',
+          'ps reads a snapshot and formats the selected processes as rows.',
+          'The PID column identifies the process; it can change when a process restarts.'
+        ],
+        expectedOutput: 'UID  PID  COMMAND\\nroot  1    systemd\\nstudent 721 bash\\nstudent 1042 demo_node (simulated)',
+        outputMeaning: [
+          'PID 1042 is the sample demo_node process in this virtual terminal.',
+          'The names and PIDs are illustrative; this is not a listing from your computer.'
+        ],
+        commonMistake: 'Do not assume a PID is permanent or kill a process just because its name looks unfamiliar. Verify the command line and ownership first.',
+        roboticsUse: 'Check whether a ROS node or launch process is still running before investigating a duplicate node or failed restart.'
+      },
+      {
+        id: 'terminate-process',
+        title: 'Request graceful termination',
+        command: 'kill -TERM 1042',
+        purpose: 'Send SIGTERM to the sample process in the virtual process table.',
+        syntax: 'kill -TERM PID',
+        tokens: [
+          { token: 'kill', role: 'command', meaning: 'Sends a signal to a process identified by PID; it does not always forcibly terminate it.' },
+          { token: '-TERM', role: 'signal', meaning: 'Requests orderly termination so the process can clean up.' },
+          { token: '1042', role: 'argument', meaning: 'The sample PID found in the previous step.' }
+        ],
+        howItWorks: [
+          'The shell parses the target PID and signal.',
+          'On a real Linux system, permissions and process state determine whether the signal can be sent.',
+          'This simulator marks its sample process as stopped so the next ps command can verify the change.'
+        ],
+        expectedOutput: '(no terminal output; simulated SIGTERM sent)',
+        outputMeaning: [
+          'Real kill commonly prints nothing when the signal request succeeds.',
+          'The training shell reports the simulated state change in its status message; no host process is signalled.'
+        ],
+        commonMistake: 'Avoid SIGKILL as the first response. SIGTERM gives a process an opportunity to flush data and release resources.',
+        roboticsUse: 'Stop a stuck development node gracefully before restarting it, then inspect logs if it does not exit as expected.'
+      },
+      {
+        id: 'verify-process-stop',
+        title: 'Verify the process stopped',
+        command: 'ps -ef',
+        purpose: 'Confirm that the sample process no longer appears after SIGTERM.',
+        syntax: 'ps -ef',
+        tokens: [
+          { token: 'ps -ef', role: 'command', meaning: 'Takes another process snapshot.' }
+        ],
+        howItWorks: [
+          'The simulator reads its updated virtual process table.',
+          'The sample demo_node entry should no longer be present.',
+          'Verification distinguishes an actual state change from a command that merely printed a success message.'
+        ],
+        expectedOutput: 'UID  PID  COMMAND\\nroot  1    systemd\\nstudent 721 bash',
+        outputMeaning: [
+          'The sample demo_node process is absent from the simulated process table.',
+          'Real processes may ignore or delay SIGTERM, so always verify on the target machine.'
+        ],
+        commonMistake: 'A successful signal request is not proof that the process has exited. Check the process table or the service manager.',
+        roboticsUse: 'Verify shutdown before relaunching a ROS node to avoid duplicated publishers, device contention or multiple control loops.'
+      }
+    ]
   },
 };

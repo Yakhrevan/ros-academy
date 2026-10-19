@@ -164,8 +164,9 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
   if (command === 'true') return { command, output: '', status: 'Exit status 0 (simulated).', cwd };
   if (command === 'false') return { command, output: '', status: 'Exit status 1 (simulated).', cwd };
 
-  if (command.includes(';') || command.includes(' && ') || command.includes(' || ')) {
-    const parts = splitShellSequence(command);
+  const sequenceParts = splitShellSequence(command);
+  if (sequenceParts.some((part) => part === ';' || part === '&&' || part === '||')) {
+    const parts = sequenceParts;
     let currentCwd = cwd;
     let lastExitCode = 0;
     const outputs: string[] = [];

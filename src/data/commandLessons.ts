@@ -471,5 +471,84 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
       {id:'lspci',title:'List PCI / PCIe devices',command:'lspci',purpose:'Inspect internal controllers such as Ethernet, storage, USB and accelerator hardware.',syntax:'lspci [OPTIONS]',tokens:[{token:'lspci',role:'command',meaning:'Lists PCI bus devices and controllers.'}],howItWorks:['The utility enumerates PCI devices exposed by the system.','Device IDs can help determine chipset or controller type.','Driver binding and runtime health need further inspection.'],expectedOutput:'00:14.0 USB controller (illustrative)\n01:00.0 Ethernet controller (illustrative)',outputMeaning:['Bus/device/function identifiers locate devices on the PCI hierarchy.','This example is generic; actual hardware and IDs differ.'],commonMistake:'lspci showing a controller does not guarantee its kernel driver is loaded or that the peripheral is healthy.',roboticsUse:'Identify NICs, storage controllers and expansion hardware when choosing a compute platform for cameras, LiDAR or accelerator cards.'},
       {id:'ip-link',title:'Inspect network and CAN interfaces',command:'ip link',purpose:'See Linux network interfaces and their link state; configured SocketCAN devices can also appear here.',syntax:'ip link show',tokens:[{token:'ip',role:'command',meaning:'Queries and manages Linux networking.'},{token:'link',role:'object',meaning:'Lists link-layer interface details without necessarily showing IP addresses.'}],howItWorks:['The tool queries interfaces known to the networking stack.','Flags indicate state such as UP or LOWER_UP where provided.','A CAN interface must be configured and supported; it may be named can0, but naming varies.'],expectedOutput:'1: lo: <LOOPBACK,UP>\n2: enp2s0: <BROADCAST,MULTICAST,UP>\n3: can0: <NOARP> (illustrative)',outputMeaning:['lo is loopback; enp2s0 is an example Ethernet interface; can0 is an example CAN interface.','Actual names, state flags and available interfaces depend on drivers and configuration.'],commonMistake:'An interface being listed does not show protocol-level communication is successful. For CAN, also verify bitrate, state, transceiver and bus termination.',roboticsUse:'Map the available network/CAN interfaces before connecting a robot driver to a LiDAR, motor controller, BMS or another computer.'},
       {id:'dmesg-device',title:'Inspect kernel device events',command:'dmesg | grep -i -E "usb|tty|can"',purpose:'Filter kernel messages for recent USB, serial and CAN-related device events.',syntax:'dmesg | grep -i -E "PATTERN"',tokens:[{token:'dmesg',role:'command 1',meaning:'Prints kernel ring-buffer messages.'},{token:'|',role:'pipe',meaning:'Passes the log text to the next program.'},{token:'grep -i -E',role:'filter options',meaning:'Case-insensitive extended regular expression matching.'},{token:'"usb|tty|can"',role:'pattern',meaning:'Matches messages containing any of the example alternatives.'}],howItWorks:['dmesg emits kernel messages.','The pipe sends text into grep.','grep filters lines that match USB, TTY or CAN patterns without changing hardware state.'],expectedOutput:'usb 1-2: new high-speed USB device (illustrative)\nttyUSB0: USB serial device (illustrative)',outputMeaning:['Messages can indicate enumeration or driver binding, but the exact wording depends on the kernel and device.','Permission errors and application protocol failures may be logged elsewhere.'],commonMistake:'Do not assume every kernel message is fatal. Correlate timestamps with plug/unplug events and inspect surrounding messages.',roboticsUse:'Investigate why a USB sensor disappears, a serial adapter changes name, or a CAN adapter fails to initialize.'}
-  ]}
+  ]},
+
+  'linux-search': {
+    lessonId: 'linux-search',
+    intro: 'Learn to inspect text files, filter matching lines and locate files by name inside the virtual training workspace.',
+    mentalModel: 'Think of cat as reading a file, grep as keeping only lines that match a pattern, and find as walking through folders to discover entries by name. They answer different questions: what is in this file, which lines mention this term, and where is a file located?',
+    steps: [
+      {
+        id: 'cat-readme',
+        title: 'Read a project README',
+        command: 'cat README.md',
+        purpose: 'Read the content of a known text file without opening a graphical editor.',
+        syntax: 'cat FILE',
+        tokens: [
+          { token: 'cat', role: 'command', meaning: 'Reads one or more files and writes their contents to standard output.' },
+          { token: 'README.md', role: 'argument', meaning: 'The relative path of the file to read from the current directory.' }
+        ],
+        howItWorks: [
+          'The shell resolves README.md relative to the current working directory.',
+          'cat reads the file bytes and writes them to standard output.',
+          'Reading does not change the working directory or modify the file.'
+        ],
+        expectedOutput: '# Robot workspace\\nA simulated ROS 2 learning project.',
+        outputMeaning: [
+          'The first line is a Markdown heading describing the sample project.',
+          'The content belongs to the virtual training filesystem, not a file on your device.'
+        ],
+        commonMistake: 'If the file is not in the current directory, cat reports that it cannot find it. Run pwd and ls, or provide the correct path.',
+        roboticsUse: 'Inspect a package README, build instructions or a short configuration note before changing a robotics workspace.'
+      },
+      {
+        id: 'grep-readme',
+        title: 'Filter lines with grep',
+        command: 'grep robot README.md',
+        purpose: 'Show only lines in a text file that contain a search pattern.',
+        syntax: 'grep PATTERN FILE',
+        tokens: [
+          { token: 'grep', role: 'command', meaning: 'Searches input text for lines matching a pattern.' },
+          { token: 'robot', role: 'pattern', meaning: 'A literal, case-sensitive substring in this example.' },
+          { token: 'README.md', role: 'argument', meaning: 'The virtual file to search.' }
+        ],
+        howItWorks: [
+          'grep opens the named file and processes it line by line.',
+          'Each line containing the pattern is written to standard output.',
+          'If no line matches, grep normally prints no matching line; its exit status distinguishes no match from a read error.'
+        ],
+        expectedOutput: 'A simulated ROS 2 learning project.',
+        outputMeaning: [
+          'Only the line containing the lowercase word robot is returned by the virtual example.',
+          'Matching is case-sensitive here; real grep supports options such as -i for case-insensitive matching.'
+        ],
+        commonMistake: 'A blank result can mean no match rather than a missing file. Check the file path and try a more specific or correctly cased pattern.',
+        roboticsUse: 'Filter logs and configuration files for node names, device identifiers, error text or parameter names.'
+      },
+      {
+        id: 'find-package-xml',
+        title: 'Locate package manifests',
+        command: 'find . -name package.xml',
+        purpose: 'Search the current directory tree for files named package.xml.',
+        syntax: 'find PATH -name PATTERN',
+        tokens: [
+          { token: 'find', role: 'command', meaning: 'Walks a directory tree and evaluates a test for each entry.' },
+          { token: '.', role: 'path', meaning: 'Starts at the current directory.' },
+          { token: '-name package.xml', role: 'test', meaning: 'Matches entry names against the supplied filename pattern.' }
+        ],
+        howItWorks: [
+          'find starts at the specified path and visits entries beneath it.',
+          'The -name test compares each entry name with package.xml.',
+          'Matching paths are printed; this does not edit the files.'
+        ],
+        expectedOutput: './src/demo_robot/package.xml',
+        outputMeaning: [
+          'The relative result points to the manifest in the sample ROS 2 package.',
+          'A real workspace may contain multiple package manifests, each with its own relative path.'
+        ],
+        commonMistake: 'Searching from . only covers the current directory and its descendants. Start from the intended workspace root to avoid missing packages.',
+        roboticsUse: 'Locate ROS package manifests, launch files, URDF/Xacro assets or configuration files before inspecting or building a workspace.'
+      }
+    ]
+  },
 };

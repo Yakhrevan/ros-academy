@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FileText, Folder, Play, RotateCcw, SkipForward, Terminal } from 'lucide-react';
+import { FileText, Folder, Gauge, Play, RotateCcw, SkipForward, Terminal } from 'lucide-react';
 
 type Props = { command: string; output: string; cwd: string; title: string };
 type Phase = 'ready' | 'typing' | 'submitted' | 'revealed' | 'verify-command' | 'verify-submitted' | 'verify-output';
@@ -8,6 +8,7 @@ export default function TerminalCommandAnimation({ command, output, cwd, title }
   const [phase, setPhase] = useState<Phase>('ready');
   const [typed, setTyped] = useState('');
   const [revealedOutput, setRevealedOutput] = useState('');
+  const [speed, setSpeed] = useState<1 | 1.5 | 2>(1);
   const [newDirectory, setNewDirectory] = useState<string | null>(null);
   const timer = useRef<number | undefined>(undefined);
   const outputTimer = useRef<number | undefined>(undefined);
@@ -61,7 +62,7 @@ export default function TerminalCommandAnimation({ command, output, cwd, title }
       setTyped(command.slice(0, index));
       if (index >= command.length) {
         clearTimer();
-        window.setTimeout(() => setPhase('submitted'), 350);
+        window.setTimeout(() => setPhase('submitted'), 350 / speed);
         window.setTimeout(() => {
           if (isCd) setNewDirectory(resolveDirectory());
           setPhase('revealed');
@@ -74,11 +75,11 @@ export default function TerminalCommandAnimation({ command, output, cwd, title }
                 if (outputTimer.current !== undefined) window.clearInterval(outputTimer.current);
                 outputTimer.current = undefined;
               }
-            }, 22);
+            }, 22 / speed);
           }
-        }, 950);
+        }, 950 / speed);
       }
-    }, 75);
+    }, 75 / speed);
   };
 
   const stepForward = () => {
@@ -115,6 +116,7 @@ export default function TerminalCommandAnimation({ command, output, cwd, title }
     <div className="command-animation-controls">
       <button className="button-primary" onClick={play}><Play size={14}/> {phase === 'ready' ? 'Play animation' : 'Replay animation'}</button>
       <button className="button-secondary" onClick={stepForward} disabled={phase === 'verify-output' || (phase === 'revealed' && !isCd)}><SkipForward size={14}/> Next animation step</button>
+      <button className="button-secondary" onClick={() => setSpeed((current) => current === 1 ? 1.5 : current === 1.5 ? 2 : 1)} title="Cycle animation speed"><Gauge size={14}/> Speed {speed}×</button>
       <button className="button-secondary" onClick={reset}><RotateCcw size={14}/> Reset</button>
     </div>
     <p className="command-animation-note">This is a safe terminal simulation. Directory transitions are illustrative and do not execute commands on your device.</p>

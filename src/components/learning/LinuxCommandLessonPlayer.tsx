@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, CornerDownRight, Play, RotateCcw, Terminal, Lightbulb, GitBranch } from 'lucide-react';
 import type { Lesson } from '../../types/lesson';
 import type { CommandStep } from '../../types/commandLesson';
@@ -28,6 +28,17 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
   const [history, setHistory] = useState<TerminalResult[]>([]);
   const [showHints, setShowHints] = useState(false);
   const [ranCurrentStep, setRanCurrentStep] = useState(false);
+
+  useEffect(() => {
+    const first = commandLessons[lesson.id]?.steps[0];
+    setStepIndex(0);
+    setCwd(INITIAL_CWD);
+    setInput(first?.command ?? 'pwd');
+    setResult({ command: 'pwd', output: INITIAL_CWD, status: 'Ready. Run a command to experiment in this simulated shell.', cwd: INITIAL_CWD });
+    setHistory([]);
+    setShowHints(false);
+    setRanCurrentStep(false);
+  }, [lesson.id]);
 
   const step: CommandStep | undefined = steps[stepIndex];
   const progress = steps.length ? ((stepIndex + 1) / steps.length) * 100 : 0;

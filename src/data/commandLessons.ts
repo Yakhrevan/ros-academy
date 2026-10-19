@@ -550,7 +550,7 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         roboticsUse: 'Locate ROS package manifests, launch files, URDF/Xacro assets or configuration files before inspecting or building a workspace.'
       }
     ]
-  },,
+  },
 
   'linux-pipelines': {
     lessonId: 'linux-pipelines',

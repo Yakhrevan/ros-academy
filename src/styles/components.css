@@ -672,3 +672,31 @@
 .user-feedback{display:flex;align-items:flex-start;gap:7px;margin:10px 0 0;padding:9px;border:1px solid #b9e0cb;border-radius:7px;background:#f0fbf5;color:#2f6d50;font-size:10px;line-height:1.8}
 .user-feedback svg{flex:0 0 auto}
 @media(max-width:560px){.user-group-practice{padding:12px}.user-controls{align-items:stretch;flex-direction:column}.user-controls label:first-child input{width:100%}.user-terminal-actions{display:grid;grid-template-columns:1fr}.user-terminal-actions button{width:100%}}
+
+
+/* Linux network troubleshooting simulator */
+.networking-practice{margin:18px 0;padding:18px;border:1px solid #dbe6f4;border-radius:14px;background:#fff}
+.network-command-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.network-command-tabs button{padding:8px 10px;border:1px solid #d7e3f0;border-radius:7px;background:#f7faff;color:#365674;font:10px 'DM Mono',monospace;cursor:pointer}
+.network-command-tabs button.active{border-color:#347fd3;background:#eaf4ff;color:#1e5793}
+.network-terminal{overflow:hidden;border:1px solid #2b4059;border-radius:10px;background:#101c2c;color:#e5efff}
+.network-terminal-bar{display:flex;justify-content:space-between;gap:8px;padding:10px;background:#1b2c42;border-bottom:1px solid #2b4059;color:#9fb8d5;font-size:8px}
+.network-command{display:flex;gap:9px;padding:12px;border-bottom:1px solid #2b4059;color:#8fe0b8}
+.network-command code{color:#fff;font:11px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.network-host{display:flex;align-items:center;gap:7px;margin:10px;padding:8px;border:1px solid #3d5877;border-radius:7px;color:#9eb7d4;font-size:10px}
+.network-host input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#e5efff;font:11px 'DM Mono',monospace}
+.network-output{min-height:85px;margin:0;padding:13px;color:#b5ffdc;font:10px/1.8 'DM Mono',monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.network-actions{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border-top:1px solid #2b4059}
+.network-actions button{font-size:10px}
+.network-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.network-flow>div{min-width:0;padding:10px;border:1px solid #dbe6f4;border-radius:8px;background:#f7faff}
+.network-flow small{display:block;margin-bottom:7px;color:#6c88a7;font-size:8px;font-weight:800;letter-spacing:.06em}
+.network-flow code{color:#285b92;font:10px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.network-explanation{margin-top:12px;padding:12px;border:1px solid #dbe6f4;border-radius:9px;background:#f7faff}
+.network-explanation>b{color:#203d5d;font-size:12px}
+.network-explanation>p{margin:8px 0;color:#506780;font-size:11px;line-height:1.8}
+.network-explanation code{color:#285b92;font-family:'DM Mono',monospace;overflow-wrap:anywhere}
+.network-explanation button{font-size:10px}
+.network-feedback{display:flex;align-items:flex-start;gap:7px;margin:10px 0 0;padding:9px;border:1px solid #b9e0cb;border-radius:7px;background:#f0fbf5;color:#2f6d50;font-size:10px;line-height:1.8}
+.network-feedback svg{flex:0 0 auto}
+@media(max-width:560px){.networking-practice{padding:12px}.network-terminal-bar{font-size:7px}.network-flow{grid-template-columns:1fr}.network-actions{display:grid;grid-template-columns:1fr}.network-actions button{width:100%}}

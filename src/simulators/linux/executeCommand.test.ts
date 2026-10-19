@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CommandStep } from '../../types/commandLesson';
-import { executeCommand } from './executeCommand';
+import { executeCommand, resetTerminalSimulator } from './executeCommand';
 
 const cwd = '/home/student';
 const steps: CommandStep[] = [];
@@ -110,6 +110,21 @@ describe('Linux terminal virtual filesystem and state', () => {
   it('runs the right-hand command for || after a simulated failure', () => {
     const result = executeCommand('false || echo recovered', cwd, steps);
     expect(result.output).toBe('recovered');
+  });
+
+  it('resets filesystem, environment, directory and process state to defaults', () => {
+    resetTerminalSimulator();
+    executeCommand('echo temporary > /tmp/reset-state-test.txt', cwd, steps);
+    executeCommand('export ROS_ACADEMY_RESET_TEST=changed', cwd, steps);
+    executeCommand('kill -TERM 1042', cwd, steps);
+    executeCommand('cd /tmp', cwd, steps);
+
+    resetTerminalSimulator();
+
+    expect(executeCommand('cat /tmp/reset-state-test.txt', cwd, steps).status).toContain('no such file');
+    expect(executeCommand('echo $ROS_ACADEMY_RESET_TEST', cwd, steps).output).toBe('');
+    expect(executeCommand('ps -ef', cwd, steps).output).toContain('demo_node');
+    expect(executeCommand('pwd', cwd, steps).output).toBe('/home/student');
   });
 
   it('reflects simulated process termination in later process listings', () => {

@@ -45,6 +45,8 @@ const FS: SimulatedFileSystem = {
   '/var': ['log', 'tmp']
 };
 
+const INITIAL_FS: SimulatedFileSystem = Object.fromEntries(Object.entries(FS).map(([path, entries]) => [path, [...entries]]));
+
 function normalizePath(path: string): string {
   const parts: string[] = [];
   path.split('/').forEach((part) => {
@@ -104,6 +106,25 @@ const virtualFileContents: Record<string, string> = {
   '/home/student/projects/coding-practice-lab/README.md': '# Coding practice lab\nExercises for robotics developers.\n',
   '/home/student/projects/coding-practice-lab/python-basics/hello.py': 'print("Hello, robotics!")\n',
 };
+
+const INITIAL_FILE_CONTENTS: Record<string, string> = { ...virtualFileContents };
+
+export function resetTerminalSimulator(): void {
+  for (const path of Object.keys(FS)) delete FS[path];
+  for (const [path, entries] of Object.entries(INITIAL_FS)) FS[path] = [...entries];
+
+  for (const path of Object.keys(virtualFileContents)) delete virtualFileContents[path];
+  Object.assign(virtualFileContents, INITIAL_FILE_CONTENTS);
+
+  previousDirectory = '/home/student';
+  simulatedRosDistro = '';
+  simulatedDemoNodeRunning = true;
+  for (const name of Object.keys(simulatedEnvironment)) delete simulatedEnvironment[name];
+  Object.assign(simulatedEnvironment, {
+    HOME: '/home/student',
+    PATH: '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin',
+  });
+}
 
 export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): TerminalResult {
   const command = raw.trim();

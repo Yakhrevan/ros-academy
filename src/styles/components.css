@@ -111,6 +111,8 @@
 .step-dots button{width:8px;height:8px;border:0;border-radius:99px;background:#d8e3f0;padding:0;cursor:pointer}
 .step-dots button.active{width:22px;background:#2879e8}
 .step-dots button.visited{background:#65b998}
+.step-dots button.completed{width:20px;height:20px;border-radius:6px;background:#e7f7ef;color:#16784f;font-size:12px;font-weight:800;line-height:20px;text-align:center;border:1px solid #a9dfc5}
+.step-dots button.completed.active{width:26px;border-color:#2879e8;background:#eaf3ff;color:#1f62b7}
 .command-bottom-navigation{display:flex;justify-content:space-between;gap:8px}
 .command-bottom-navigation button{display:flex;align-items:center;gap:5px;font-size:10px}
 .command-bottom-navigation button:disabled{opacity:.35;cursor:not-allowed}

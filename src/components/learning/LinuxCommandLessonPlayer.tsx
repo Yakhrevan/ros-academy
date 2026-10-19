@@ -20,7 +20,15 @@ const INITIAL_CWD = '/home/student';
 
 export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, onComplete, onPreviousLesson, onNextLesson, canGoPrevious, canGoNext }: Props) {
   const definition = commandLessons[lesson.id];
-  const steps = definition?.steps ?? [];
+  const navigationOrder = ['pwd', 'ls', 'cd-into-workspace', 'ls-workspace', 'cd-src', 'ls-src', 'cd-package', 'cd-back-one', 'cd-back-two', 'cd-home', 'cd-absolute', 'cd-previous', 'cd-wrong-path', 'ls-details'];
+  const steps = (definition?.steps ?? []).filter((item) => !['cd-ros2-ws', 'pwd-verify', 'cd-parent'].includes(item.id)).slice().sort((a, b) => {
+    const aIndex = navigationOrder.indexOf(a.id);
+    const bIndex = navigationOrder.indexOf(b.id);
+    if (aIndex < 0 && bIndex < 0) return 0;
+    if (aIndex < 0) return 1;
+    if (bIndex < 0) return -1;
+    return aIndex - bIndex;
+  });
   const [stepIndex, setStepIndex] = useState(0);
   const [cwd, setCwd] = useState(INITIAL_CWD);
   const [input, setInput] = useState(steps[0]?.command ?? 'pwd');

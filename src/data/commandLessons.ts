@@ -125,6 +125,264 @@ export const commandLessons: Record<string, CommandLessonDefinition> = {
         roboticsUse: 'Move between a workspace, its parent project folder and home directory without closing the terminal session.'
       },
       {
+        id: 'cd-into-workspace',
+        title: 'Step 1 — Enter a project folder',
+        command: 'cd ros2_ws',
+        purpose: 'Start from /home/student and move into the ROS 2 workspace. The same navigation pattern applies to a GUVI practice-project folder or an HCL-style engineering project workspace; the names here are examples, not company internal paths.',
+        syntax: 'cd DIRECTORY',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Change the current working directory of this shell.' },
+          { token: 'ros2_ws', role: 'relative path', meaning: 'The target directory name, resolved from your current location (/home/student).' }
+        ],
+        howItWorks: [
+          'First run pwd so you know where you are starting.',
+          'The shell resolves ros2_ws relative to /home/student.',
+          'If the directory exists and you have access, the shell changes location. Successful cd normally prints no output.',
+          'Run pwd again to verify the destination.'
+        ],
+        expectedOutput: 'Normally no output from cd. Then run pwd:\n/home/student/ros2_ws',
+        outputMeaning: [
+          'No output from cd is normal; it does not mean the command failed.',
+          'The follow-up pwd confirms the new current directory.',
+          'For another project, replace ros2_ws with the actual directory name shown by ls.'
+        ],
+        commonMistake: 'Do not type cd ros2_ws from an unknown location and assume it worked. Use pwd first. If the folder is not listed by ls, check the path before trying again.',
+        roboticsUse: 'Before colcon build, source install/setup.bash or inspect a package, move into the correct ROS workspace and verify it.'
+      },
+      {
+        id: 'ls-workspace',
+        title: 'Step 2 — Look inside the workspace',
+        command: 'ls',
+        purpose: 'List the entries in the workspace after changing directory. This proves that cd changed your location and shows the next folders you can enter.',
+        syntax: 'ls [OPTIONS] [PATH]',
+        tokens: [
+          { token: 'ls', role: 'command', meaning: 'Lists files and directories in the current location.' },
+          { token: '[OPTIONS]', role: 'optional', meaning: 'Optional flags change display style, such as -la for hidden entries and details.' },
+          { token: '[PATH]', role: 'optional', meaning: 'A path can be supplied to inspect another directory without moving into it.' }
+        ],
+        howItWorks: [
+          'Because no path was supplied, ls inspects the current directory.',
+          'It prints directory entries such as src, build, install and log in this example.',
+          'The working directory does not change.'
+        ],
+        expectedOutput: 'README.md  build  install  log  src',
+        outputMeaning: [
+          'src usually contains the source packages you maintain.',
+          'build, install and log are commonly created by colcon during builds.',
+          'Your own workspace may contain a different set of entries.'
+        ],
+        commonMistake: 'ls only lists entries; it does not enter a directory. Use cd src to move into src.',
+        roboticsUse: 'Confirm the workspace structure before building or debugging a ROS package.'
+      },
+      {
+        id: 'cd-src',
+        title: 'Step 3 — Enter the src directory',
+        command: 'cd src',
+        purpose: 'Move one level down from ros2_ws into the source directory.',
+        syntax: 'cd DIRECTORY',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Changes the current directory.' },
+          { token: 'src', role: 'relative path', meaning: 'Means the src directory inside the current ros2_ws directory.' }
+        ],
+        howItWorks: [
+          'The current location is /home/student/ros2_ws.',
+          'The relative path src resolves to /home/student/ros2_ws/src.',
+          'The shell changes its location; verify it with pwd.'
+        ],
+        expectedOutput: 'No output from cd. Run pwd:\n/home/student/ros2_ws/src',
+        outputMeaning: [
+          'The path ends in /src, so you are now inside the source folder.',
+          'Run ls to see the packages available here.'
+        ],
+        commonMistake: 'A relative path is interpreted from your current directory, not always from your home directory.',
+        roboticsUse: 'ROS 2 package source folders normally live inside a workspace src directory.'
+      },
+      {
+        id: 'ls-src',
+        title: 'Step 4 — Find the package directory',
+        command: 'ls',
+        purpose: 'List packages in src before entering one. This is the same safe workflow you would use to inspect a training project or a work repository.',
+        syntax: 'ls',
+        tokens: [
+          { token: 'ls', role: 'command', meaning: 'Lists entries in the current directory; here, the workspace src folder.' }
+        ],
+        howItWorks: [
+          'ls reads entries in /home/student/ros2_ws/src.',
+          'The virtual workspace contains demo_robot and my_robot_bringup as example packages.',
+          'The shell remains in src.'
+        ],
+        expectedOutput: 'demo_robot  my_robot_bringup',
+        outputMeaning: [
+          'Each entry is a directory in this simulated workspace.',
+          'Choose the actual package name you want to inspect.'
+        ],
+        commonMistake: 'Do not assume every project uses the same package name. List the directory first, then copy the exact name.',
+        roboticsUse: 'Find the package before inspecting package.xml, source files, launch files or configuration.'
+      },
+      {
+        id: 'cd-package',
+        title: 'Step 5 — Enter a package directory',
+        command: 'cd demo_robot',
+        purpose: 'Move from src into the example demo_robot package.',
+        syntax: 'cd DIRECTORY',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Changes the shell’s current directory.' },
+          { token: 'demo_robot', role: 'relative path', meaning: 'The package directory listed by the previous ls command.' }
+        ],
+        howItWorks: [
+          'The shell resolves demo_robot relative to /home/student/ros2_ws/src.',
+          'The destination becomes /home/student/ros2_ws/src/demo_robot.',
+          'Run pwd and ls to verify both location and contents.'
+        ],
+        expectedOutput: 'No output from cd. Then run pwd:\n/home/student/ros2_ws/src/demo_robot',
+        outputMeaning: [
+          'You are inside the selected package.',
+          'The example package contains package.xml, src, launch and config.'
+        ],
+        commonMistake: 'If cd reports “No such file or directory”, return to the parent with cd .. and check the exact name with ls.',
+        roboticsUse: 'Navigate to a ROS package before editing source code, launch files or parameters.'
+      },
+      {
+        id: 'cd-back-one',
+        title: 'Step 6 — Go back one folder',
+        command: 'cd ..',
+        purpose: 'Return from demo_robot to its parent directory, src. This is the standard way to go up exactly one level.',
+        syntax: 'cd ..',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Changes the current directory.' },
+          { token: '..', role: 'path component', meaning: 'Names the parent directory one level above the current directory.' }
+        ],
+        howItWorks: [
+          'Starting from /home/student/ros2_ws/src/demo_robot, the shell resolves .. to /home/student/ros2_ws/src.',
+          'The shell changes location and normally prints nothing.',
+          'Run pwd to verify the parent directory.'
+        ],
+        expectedOutput: 'No output from cd. Then run pwd:\n/home/student/ros2_ws/src',
+        outputMeaning: [
+          'Only one level was removed from the path.',
+          'cd .. does not automatically return to home.'
+        ],
+        commonMistake: 'Do not confuse cd .. with cd / or cd ~. They go to the filesystem root and home directory respectively.',
+        roboticsUse: 'Move between a package folder and the workspace source directory without closing the terminal.'
+      },
+      {
+        id: 'cd-back-two',
+        title: 'Step 7 — Go up two levels',
+        command: 'cd ../..',
+        purpose: 'Move up two directory levels in one command. From src/demo_robot this returns to ros2_ws.',
+        syntax: 'cd ../..',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Changes the current directory.' },
+          { token: '..', role: 'first parent', meaning: 'Moves one level up.' },
+          { token: '/', role: 'path separator', meaning: 'Separates the two parent-directory components.' },
+          { token: '..', role: 'second parent', meaning: 'Moves up one additional level.' }
+        ],
+        howItWorks: [
+          'Each .. component is resolved in sequence.',
+          'From /home/student/ros2_ws/src, the first .. resolves to /home/student/ros2_ws; the second would move to /home/student if you ran it from src.',
+          'For a predictable demonstration, check pwd before and after. The exact destination depends on your starting location.'
+        ],
+        expectedOutput: 'From /home/student/ros2_ws/src/demo_robot: /home/student/ros2_ws\nFrom /home/student/ros2_ws/src: /home/student',
+        outputMeaning: [
+          'Every .. represents one parent step.',
+          'Count the parent components and consider your starting path before running the command.'
+        ],
+        commonMistake: 'The result depends on where you start. Run pwd first instead of memorizing a destination for cd ../.. in every situation.',
+        roboticsUse: 'Quickly move between nested source, package and workspace directories while inspecting project files.'
+      },
+      {
+        id: 'cd-home',
+        title: 'Step 8 — Return to your home directory',
+        command: 'cd ~',
+        purpose: 'Return to the current user’s home directory from almost any location.',
+        syntax: 'cd ~  or  cd',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Changes the current directory.' },
+          { token: '~', role: 'home shortcut', meaning: 'The shell expands this to the current user’s home directory.' }
+        ],
+        howItWorks: [
+          'The shell expands ~ to the current user’s home path.',
+          'The current directory changes to /home/student in this simulator.',
+          'A bare cd with no argument normally returns to the same home directory.'
+        ],
+        expectedOutput: 'No output from cd. Run pwd:\n/home/student',
+        outputMeaning: [
+          'You are back in the user’s home directory.',
+          'cd and cd ~ are useful recovery commands when you have lost track of nested folders.'
+        ],
+        commonMistake: 'The home directory is not the filesystem root /. On a real machine it may be /home/your-username.',
+        roboticsUse: 'Return to a stable starting point before opening another repository or workspace.'
+      },
+      {
+        id: 'cd-absolute',
+        title: 'Step 9 — Jump directly using an absolute path',
+        command: 'cd /home/student/ros2_ws/src/demo_robot',
+        purpose: 'Navigate directly to a known location without stepping through each parent directory.',
+        syntax: 'cd /FULL/PATH/TO/DIRECTORY',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Changes the current directory.' },
+          { token: '/home/student/ros2_ws/src/demo_robot', role: 'absolute path', meaning: 'Starts with /, so the path is resolved from filesystem root, regardless of the current directory.' }
+        ],
+        howItWorks: [
+          'The leading / marks an absolute path.',
+          'The shell resolves every path component from the root directory.',
+          'If the destination exists and is accessible, the shell moves there.'
+        ],
+        expectedOutput: 'No output from cd. Run pwd:\n/home/student/ros2_ws/src/demo_robot',
+        outputMeaning: [
+          'Absolute paths are independent of the starting directory.',
+          'The username and workspace path differ on real systems; use the path that exists on your machine.'
+        ],
+        commonMistake: 'A path without a leading / is usually relative. Check spelling, capitalization and the actual home directory.',
+        roboticsUse: 'Use a known absolute path in documentation or scripts when the path must be unambiguous; avoid hard-coding user-specific paths in reusable code.'
+      },
+      {
+        id: 'cd-previous',
+        title: 'Step 10 — Switch back to the previous directory',
+        command: 'cd -',
+        purpose: 'Jump to the previous working directory. Unlike cd .., this switches between the last two locations.',
+        syntax: 'cd -',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Changes the shell’s current directory.' },
+          { token: '-', role: 'previous-directory shortcut', meaning: 'Uses OLDPWD, the previous working directory, when the shell has one.' }
+        ],
+        howItWorks: [
+          'The shell remembers the previous working directory after a successful directory change.',
+          'cd - changes to that previous directory and typically prints the destination path.',
+          'Running cd - again can switch back, similar to toggling between two locations.'
+        ],
+        expectedOutput: 'Example: /home/student/ros2_ws',
+        outputMeaning: [
+          'The destination depends on the directory you were in before the last cd.',
+          'The virtual terminal models this previous-directory behavior.'
+        ],
+        commonMistake: 'If no previous directory has been recorded, a real shell may report that OLDPWD is not set. Use cd ~ as a reliable fallback.',
+        roboticsUse: 'Switch between a package directory and a workspace root while editing or building without retyping long paths.'
+      },
+      {
+        id: 'cd-wrong-path',
+        title: 'Step 11 — Recover from a wrong folder name',
+        command: 'cd missing_folder',
+        purpose: 'Practice the common error that happens when a directory name is misspelled or the current directory is wrong.',
+        syntax: 'cd DIRECTORY',
+        tokens: [
+          { token: 'cd', role: 'command', meaning: 'Attempts to change the working directory.' },
+          { token: 'missing_folder', role: 'argument', meaning: 'An intentionally nonexistent directory in this lesson.' }
+        ],
+        howItWorks: [
+          'The shell resolves the requested directory relative to the current location.',
+          'The virtual filesystem cannot find that directory, so the location does not change.',
+          'Run pwd to confirm you stayed where you were; run ls to inspect valid names.'
+        ],
+        expectedOutput: 'No such directory in the virtual filesystem: (resolved path)',
+        outputMeaning: [
+          'A failed cd leaves the working directory unchanged.',
+          'Use pwd, ls and the exact directory spelling to recover.'
+        ],
+        commonMistake: 'Do not keep guessing names. Inspect the current directory and copy an existing entry exactly, including capitalization.',
+        roboticsUse: 'Use the same recovery pattern when navigating repositories, package directories or deployment folders.'
+      },
+      {
         id: 'ls-details',
         title: 'Inspect hidden files and metadata',
         command: 'ls -la',

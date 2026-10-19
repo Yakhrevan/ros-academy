@@ -20,7 +20,15 @@ const INITIAL_CWD = '/home/student';
 
 export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, onComplete, onPreviousLesson, onNextLesson, canGoPrevious, canGoNext }: Props) {
   const definition = commandLessons[lesson.id];
-  const steps = definition?.steps ?? [];
+  const navigationOrder = ['pwd', 'ls', 'cd-into-workspace', 'ls-workspace', 'cd-src', 'ls-src', 'cd-package', 'cd-back-one', 'cd-back-two', 'cd-home', 'cd-absolute', 'cd-previous', 'cd-wrong-path', 'ls-details'];
+  const steps = (definition?.steps ?? []).filter((item) => !['cd-ros2-ws', 'pwd-verify', 'cd-parent'].includes(item.id)).slice().sort((a, b) => {
+    const aIndex = navigationOrder.indexOf(a.id);
+    const bIndex = navigationOrder.indexOf(b.id);
+    if (aIndex < 0 && bIndex < 0) return 0;
+    if (aIndex < 0) return 1;
+    if (bIndex < 0) return -1;
+    return aIndex - bIndex;
+  });
   const [stepIndex, setStepIndex] = useState(0);
   const [cwd, setCwd] = useState(INITIAL_CWD);
   const [input, setInput] = useState(steps[0]?.command ?? 'pwd');
@@ -141,6 +149,28 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
           <div className="visual-explanation"><CheckCircle2 size={17}/><p><b>Observe the effect.</b> Commands such as <code>pwd</code> only report state; <code>cd</code> changes the shell location. The visual state updates when the simulated command runs.</p></div>
         </article>
 
+        {lesson.id === 'linux-files' && <article className="panel command-scenario-panel">
+          <div className="panel-heading"><span className="step-number">REAL</span><div><h2>Practice with project-style examples</h2><p>Use the same navigation skills with two different folder structures.</p></div></div>
+          <div className="scenario-example">
+            <div className="scenario-label"><span className="scenario-dot guvi"/>Learning / practice project</div>
+            <h3>GUVI-style coding practice</h3>
+            <p>Imagine your practice files are stored under a project folder in your home directory. These names are fictional training examples, not actual GUVI paths.</p>
+            <div className="scenario-command"><code>cd ~/projects/guvi-practice</code><button onClick={() => setInput('cd ~/projects/guvi-practice')}>Use command</button></div>
+            <div className="scenario-command"><code>ls</code><button onClick={() => setInput('ls')}>Use command</button></div>
+            <div className="scenario-command"><code>cd ..</code><button onClick={() => setInput('cd ..')}>Use command</button></div>
+            <p className="scenario-hint">Goal: enter the practice folder, inspect its contents, then return to projects.</p>
+          </div>
+          <div className="scenario-example">
+            <div className="scenario-label"><span className="scenario-dot hcl"/>Engineering / robotics project</div>
+            <h3>Enterprise AMR project (HCL-style example)</h3>
+            <p>Imagine a robotics repository with source code, configuration and launch folders. This is a generic training scenario, not HCL’s internal structure.</p>
+            <div className="scenario-command"><code>cd ~/projects/enterprise-amr-demo</code><button onClick={() => setInput('cd ~/projects/enterprise-amr-demo')}>Use command</button></div>
+            <div className="scenario-command"><code>cd src</code><button onClick={() => setInput('cd src')}>Use command</button></div>
+            <div className="scenario-command"><code>cd -</code><button onClick={() => setInput('cd -')}>Use command</button></div>
+            <p className="scenario-hint">Goal: move into the project, inspect source folders, and switch back to the previous directory.</p>
+          </div>
+          <div className="scenario-workflow"><b>Recommended practice loop</b><p>Run <code>pwd</code> → use one <code>cd</code> command → run <code>pwd</code> again → use <code>ls</code> → navigate back. If a path fails, inspect the current location instead of guessing.</p></div>
+        </article>}
         <article className="panel command-reasoning-panel">
           <div className="panel-heading"><span className="step-number">03</span><div><h2>How to read the result</h2><p>Do not just memorize the output—interpret it.</p></div></div>
           <div className="expected-result"><span className="eyebrow">EXPECTED OUTPUT · EXAMPLE</span><pre>{step.expectedOutput}</pre><ul>{step.outputMeaning.map((line) => <li key={line}><CheckCircle2 size={15}/>{line}</li>)}</ul></div>

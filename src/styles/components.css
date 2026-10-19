@@ -214,3 +214,14 @@
 @keyframes fade-in-result{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:600px){.per-command-animation{padding:13px}.command-animation-controls{display:grid;grid-template-columns:1fr}.command-animation-controls button{width:100%}.command-animation-body{padding:12px;min-height:170px}}
 @media(prefers-reduced-motion:reduce){.typing-caret{animation:none}.enter-indicator,.command-animation-result{animation:none}}
+
+
+/* Show cd's silent directory transition and the follow-up pwd verification */
+.directory-transition{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:10px 0;padding:10px;border-radius:8px;background:#0d211f}
+.directory-transition>code{font:11px/1.8 'DM Mono',monospace;overflow-wrap:anywhere;color:#a8bfd8}
+.directory-transition>span{color:#70dbad;font-size:18px}
+.directory-transition>code.directory-highlight,.command-animation-result pre.directory-highlight{padding:7px 9px;border:1px solid #368b6a;border-radius:6px;background:#174333;color:#b5ffdc;box-shadow:0 0 0 2px #235b46;font-weight:700}
+.next-pwd-hint{margin-top:10px;padding:9px 10px;border-left:3px solid #78aefb;border-radius:5px;background:#192c45;color:#c5d9f3;font-size:11px;line-height:1.7}
+.next-pwd-hint code,.command-animation-result p code{color:#a7cbff;font-family:'DM Mono',monospace}
+.after-cd-prompt{margin-top:15px;padding-top:12px;border-top:1px dashed #405571}
+.pwd-transition-note{margin:8px 0 0;color:#9eb0c7;font-size:11px}

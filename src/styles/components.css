@@ -595,3 +595,44 @@
 .package-real-world{display:flex;align-items:flex-start;gap:7px;margin-top:12px;padding:9px;border:1px solid #b9e0cb;border-radius:7px;background:#f0fbf5;color:#2f6d50;font-size:10px;line-height:1.7}
 .package-real-world svg{flex:0 0 auto}
 @media(max-width:560px){.package-inspection-practice{padding:12px}.package-terminal-bar{font-size:7px}.package-token-breakdown>div{grid-template-columns:1fr;gap:4px}.package-controls{display:grid;grid-template-columns:1fr}.package-controls button{width:100%}}
+
+
+/* Linux permissions visual editor */
+.permissions-practice{margin:18px 0;padding:18px;border:1px solid #dbe6f4;border-radius:14px;background:#fff}
+.permission-presets{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.permission-presets button{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #d7e3f0;border-radius:7px;background:#f7faff;color:#365674;cursor:pointer}
+.permission-presets button.active{border-color:#347fd3;background:#eaf4ff;color:#1e5793}
+.permission-presets code{font:700 11px 'DM Mono',monospace}.permission-presets span{font:10px 'DM Mono',monospace}
+.permission-editor{overflow:hidden;border:1px solid #2b4059;border-radius:10px;background:#101c2c;color:#e5efff}
+.permission-editor-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;background:#1b2c42;border-bottom:1px solid #2b4059;color:#91b5db;font-size:8px;font-weight:800;letter-spacing:.06em}
+.permission-editor-head label{display:flex;align-items:center;gap:7px;color:#b8c9dd;font-size:9px;letter-spacing:0;font-weight:400}
+.permission-editor-head select{max-width:140px;padding:5px;border:1px solid #47617d;border-radius:5px;background:#203650;color:#e5efff;font-size:9px}
+.permission-grid{display:grid;grid-template-columns:minmax(85px,1fr) repeat(3,minmax(50px,.7fr));gap:1px;background:#2b4059}
+.permission-grid>div,.permission-grid>label{display:flex;align-items:center;justify-content:center;min-height:39px;padding:7px;background:#142337}
+.permission-grid .permission-role{background:#203650;color:#91b5db;font-size:10px;font-weight:700}
+.permission-row{display:contents}
+.permission-row>span{display:flex;align-items:center;padding:8px;background:#1b2c42;color:#b8c9dd;font-size:10px}
+.permission-grid label{gap:6px;cursor:pointer}.permission-grid label input{accent-color:#4eab83}.permission-grid label code{font:12px 'DM Mono',monospace}
+.permission-on code{color:#9ce6c2}.permission-off code{color:#788da5}
+.permission-result{display:grid;grid-template-columns:.8fr .7fr 1.5fr;gap:8px;padding:12px;border-top:1px solid #2b4059}
+.permission-result>div{min-width:0;display:grid;align-content:start;gap:6px}
+.permission-result small{color:#91b5db;font-size:8px;font-weight:800;letter-spacing:.06em}
+.permission-result code{color:#b5ffdc;font:10px/1.7 'DM Mono',monospace;overflow-wrap:anywhere}
+.permission-result strong{color:#b5ffdc;font:700 22px 'DM Mono',monospace}
+.permission-note{margin:0;padding:10px 12px;border-top:1px solid #2b4059;color:#b8c9dd;font-size:10px;line-height:1.8}
+.permission-explanation,.permission-scenario{margin-top:12px;padding:12px;border:1px solid #dbe6f4;border-radius:9px;background:#f7faff}
+.permission-explanation h3,.permission-scenario h3{margin:0 0 8px;color:#203d5d;font-size:12px}
+.permission-values{display:flex;flex-wrap:wrap;gap:7px}
+.permission-values span{padding:6px 9px;border-radius:6px;background:#eaf4ff;color:#285b92;font-size:10px}
+.permission-values b{font:700 12px 'DM Mono',monospace}
+.permission-explanation p{color:#506780;font-size:11px;line-height:1.8}.permission-explanation code{color:#285b92;font-family:'DM Mono',monospace}
+.permission-scenario label{display:grid;gap:7px;margin-bottom:10px;color:#385775;font-size:10px;font-weight:700}
+.permission-scenario select{width:100%;padding:9px;border:1px solid #cbd9e9;border-radius:7px;background:#fff;color:#294768;font-size:11px}
+.permission-scenario button{font-size:10px}
+.permission-feedback{display:flex;align-items:flex-start;gap:7px;margin:10px 0 0;padding:9px;border:1px solid #b9e0cb;border-radius:7px;background:#f0fbf5;color:#2f6d50;font-size:10px;line-height:1.8}
+.permission-feedback svg{flex:0 0 auto}
+.permission-sudo{margin-top:12px;border:1px solid #e6c58c;border-radius:8px;overflow:hidden}
+.permission-sudo>button{display:flex;align-items:center;gap:7px;width:100%;padding:10px;border:0;background:#fff7e8;color:#785a24;text-align:left;font-size:11px;font-weight:700;cursor:pointer}
+.permission-sudo>div{padding:12px;background:#fffbf3}.permission-sudo p{color:#785a24;font-size:10px;line-height:1.8}.permission-sudo code{font-family:'DM Mono',monospace}
+.permission-sudo pre{padding:10px;border-radius:7px;background:#101c2c;color:#b5ffdc;font:10px/1.8 'DM Mono',monospace;white-space:pre-wrap}
+@media(max-width:560px){.permissions-practice{padding:12px}.permission-result{grid-template-columns:1fr 1fr}.permission-result>div:last-child{grid-column:1/-1}.permission-editor-head{align-items:flex-start;flex-direction:column}.permission-grid{grid-template-columns:minmax(72px,1fr) repeat(3,minmax(45px,.7fr))}.permission-grid>div,.permission-grid>label{padding:6px}.permission-grid label{gap:3px}}

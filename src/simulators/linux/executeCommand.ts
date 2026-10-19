@@ -73,6 +73,7 @@ function directoryEntries(cwd: string, all = false): string[] {
 
 let previousDirectory = '/home/student';
 let simulatedRosDistro = '';
+const simulatedEnvironment: Record<string, string> = { HOME: '/home/student', PATH: '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin' };
 const virtualFileContents: Record<string, string> = {
   '/home/student/Documents/notes.txt': 'Remember to source the ROS 2 setup file before using ROS CLI tools.\n',
   '/home/student/ros2_ws/README.md': '# Robot workspace\nA simulated ROS 2 learning project.\n',
@@ -87,13 +88,41 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
 
   if (command === 'help') return { command, output: 'Navigation: pwd, ls, cd DIR, cd .., cd ~, cd -\\nFiles: mkdir DIR, touch FILE, cat FILE, cp SRC DEST, mv SRC DEST, rm FILE\\nEnvironment: whoami, env, printenv, echo $HOME, echo $ROS_DISTRO, source /opt/ros/humble/setup.bash\\nDiagnostics: ps -ef, free -h, uptime, ip addr, ip route, lsblk, dmesg\\nROS: ros2 node list, ros2 topic list\\nAll commands are simulated; nothing runs on your computer.', status: 'Displayed supported command groups for this virtual terminal.', cwd };
   if (command === 'clear') return { command, output: '', status: 'Terminal output cleared.', cwd };
+  if (command.startsWith('export ')) {
+    const assignment = command.slice(7).trim();
+    const match = assignment.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!match) return { command, output: '', status: 'Usage: export NAME=value (use a valid shell variable name).', cwd };
+    const name = match[1];
+    const value = match[2].replace(/^['"]|['"]$/g, '');
+    simulatedEnvironment[name] = value;
+    if (name === 'ROS_DISTRO') simulatedRosDistro = value;
+    return { command, output: '', status: 'Set ' + name + ' in the simulated shell environment only.', cwd };
+  }
+  if (command.startsWith('unset ')) {
+    const name = command.slice(6).trim();
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) return { command, output: '', status: 'Usage: unset NAME', cwd };
+    delete simulatedEnvironment[name];
+    if (name === 'ROS_DISTRO') simulatedRosDistro = '';
+    return { command, output: '', status: 'Removed ' + name + ' from the simulated shell environment only.', cwd };
+  }
+  if (command === 'env' || command === 'printenv') {
+    const values = { ...simulatedEnvironment, PWD: cwd };
+    if (simulatedRosDistro) values.ROS_DISTRO = simulatedRosDistro;
+    const output = Object.entries(values).map(([name, value]) => name + '=' + value).join('\\n');
+    return { command, output, status: 'Displayed simulated shell variables; host environment was not accessed.', cwd };
+  }
+  if (command.startsWith('printenv ')) {
+    const name = command.slice(9).trim();
+    const value = name === 'PWD' ? cwd : name === 'ROS_DISTRO' ? simulatedRosDistro : simulatedEnvironment[name];
+    return { command, output: value ?? '', status: value === undefined || value === '' ? 'Variable is unset in the simulated shell.' : 'Read simulated environment variable ' + name + '.', cwd };
+  }
   if (command === 'pwd') return { command, output: cwd, status: 'Printed the current working directory. No state changed.', cwd };
   if (command === 'whoami') return { command, output: 'student', status: 'Displayed the current simulated user.', cwd };
   if (command === 'echo $PWD') return { command, output: cwd, status: 'Expanded PWD in the current simulated shell.', cwd };
-  if (command === 'echo $HOME') return { command, output: '/home/student', status: 'Expanded HOME in the current simulated shell.', cwd };
+  if (command === 'echo $HOME') return { command, output: simulatedEnvironment.HOME ?? '', status: 'Expanded HOME in the current simulated shell.', cwd };
   if (command === 'echo $ROS_DISTRO') return { command, output: simulatedRosDistro, status: simulatedRosDistro ? 'ROS_DISTRO is set in the simulated shell.' : 'ROS_DISTRO is not set in this simulated shell. Source the ROS setup file to set it.', cwd };
-  if (command === 'echo $PATH') return { command: command, output: '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin', status: 'Printed the simulated PATH variable.', cwd };
-  if (command.startsWith('echo ')) return { command, output: shellQuoteTrim(command.slice(5)), status: 'echo writes the supplied text to stdout.', cwd };
+  if (command === 'echo $PATH') return { command, output: simulatedEnvironment.PATH ?? '', status: 'Printed the simulated PATH variable.', cwd };
+  if (command.startsWith('echo ')) { const text = shellQuoteTrim(command.slice(5)).replace(/\\$([A-Za-z_][A-Za-z0-9_]*)/g, (_match, name: string) => name === 'PWD' ? cwd : name === 'ROS_DISTRO' ? simulatedRosDistro : simulatedEnvironment[name] ?? ''); return { command, output: text, status: 'Expanded known variables and wrote text to stdout in the simulated shell.', cwd }; }
 
   if (command === 'cd' || command === 'cd ~') { previousDirectory = cwd; return { command, output: '', status: 'Directory changed to /home/student. Successful cd normally prints no stdout.', cwd: '/home/student' }; }
   if (command === 'cd -') {

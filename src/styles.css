@@ -36,3 +36,27 @@ body{background:#f5f8fc;color:#10284a}
 .game-card{background:#fff}.game-card p,.project-card p{color:#657a94}.project-art{border-color:#dbe6f2;background:#f0f6fd}.project-card .eyebrow{color:#176bd6}
 .toast{border-color:#b9e3d1;background:#effaf4;color:#176a4d;box-shadow:0 4px 14px #16365b0b}.toast svg{color:#0b9b70}
 @media(max-width:780px){.sidebar{background:#fff;box-shadow:8px 0 24px #173b6410}.sidebar.open{border-right:1px solid #dfe7f1}}
+
+
+/* Linux Foundations Lab: responsive, calm engineering UI */
+.linux-roadmap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
+.linux-roadmap-step{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #dfe7f1;border-radius:10px;background:#fff}
+.linux-roadmap-step>span{display:grid;place-items:center;width:31px;height:31px;border:1px solid #d6e5f8;border-radius:8px;background:#f0f6ff;color:#2479ee;font-size:10px;font-weight:800}
+.linux-roadmap-step.active{border-color:#b8d3f6;background:#f5f9ff}
+.linux-roadmap-step.active>span{background:#2479ee;border-color:#2479ee;color:white}
+.linux-roadmap-step div{display:grid;gap:4px}.linux-roadmap-step b{font-size:10px;color:#18345a}.linux-roadmap-step small{font-size:9px;color:#6e8299}
+.linux-lab-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:13px;align-items:start}
+.filesystem-root{border:1px solid #e1e9f3;border-radius:9px;overflow:hidden;background:#fbfdff}
+.fs-item{display:flex;align-items:center;gap:10px;width:100%;padding:11px;border:0;border-bottom:1px solid #e8eef5;background:transparent;text-align:left;color:#294765}
+.fs-item:last-child{border-bottom:0}.fs-item:hover,.fs-item.selected{background:#edf5ff}.fs-item.selected{box-shadow:inset 3px 0 #2479ee}
+.fs-item>span:nth-child(2){display:grid;gap:3px;flex:1;min-width:0}.fs-item b{font-size:10px;font-weight:700}.fs-item small{font-size:9px;line-height:1.45;color:#6c8097}.fs-item>svg{color:#7891aa}
+.fs-symbol{display:grid;place-items:center;width:29px;height:29px;flex-shrink:0;border:1px solid #dce8f7;border-radius:8px;background:#f1f6fd;color:#2479ee;font:12px 'DM Mono',monospace}
+.fs-item.root{background:#f6f9fd}.fs-children{padding-left:15px}
+.fs-explanation{margin-top:13px;padding:13px;border:1px solid #dfe7f1;border-radius:9px;background:#fff}.fs-explanation>code{display:block;margin:8px 0;color:#155eb8;font:12px 'DM Mono',monospace;overflow-wrap:anywhere}.fs-explanation p{font-size:10px;line-height:1.8;color:#5f7590}.fs-explanation .button-secondary{font-size:10px}
+.command-panel .terminal-lab{margin-top:0}.command-panel .terminal-body{min-height:168px}.command-panel .command-buttons{max-height:145px;overflow:auto}.command-panel .info-banner{margin-top:12px}
+.execution-panel{margin-top:13px}.execution-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.execution-step{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:12px;border:1px solid #dfe7f1;border-radius:9px;background:#fbfdff}.execution-step>span{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#eaf3ff;color:#2479ee;font-size:10px;font-weight:800}.execution-step b{font-size:10px;color:#1c3b60}.execution-step small{font-size:9px;line-height:1.6;color:#687e97}.execution-step>svg{position:absolute;right:-13px;top:24px;z-index:1;color:#7d9ec4;background:#fff}
+.flow-note{margin:13px 0 0;padding:11px;border-left:3px solid #2479ee;background:#f3f7fd;color:#536b86;font-size:10px;line-height:1.8}.flow-note code{color:#165db6;font-family:'DM Mono',monospace}
+.linux-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.linux-check-grid .panel h3{font-size:13px;margin:10px 0 6px;color:#18345a}.linux-check-grid .panel p{font-size:10px;line-height:1.7;color:#6b8098}.linux-check-grid .answer-option{width:100%;margin-top:7px;font-size:10px}.quiz-label{font-size:8px;letter-spacing:1.2px;font-weight:800;color:#2479ee}
+@media(max-width:1050px){.linux-lab-grid{grid-template-columns:1fr}.execution-step>svg{right:-13px}}
+@media(max-width:780px){.linux-roadmap{grid-template-columns:1fr}.linux-roadmap-step{padding:10px}.execution-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.execution-step>svg{display:none}.linux-check-grid{grid-template-columns:1fr}.linux-lab-grid{gap:10px}.fs-children{padding-left:8px}}
+@media(max-width:430px){.execution-flow{grid-template-columns:1fr 1fr}.fs-item{padding:9px;gap:7px}.fs-item b{font-size:9px}.fs-item small{font-size:8px}.linux-roadmap-step small{font-size:8px}}

@@ -9,6 +9,10 @@ const startupFiles = [
 
 export default function ShellStartupPractice(){
   const [selected,setSelected]=useState('bashrc');
+  const [interactive,setInteractive]=useState('yes');
+  const [login,setLogin]=useState('no');
+  const [profile,setProfile]=useState('bash_profile');
+  const [outcome,setOutcome]=useState('');
   const [systemLoaded,setSystemLoaded]=useState(false);
   const [workspaceLoaded,setWorkspaceLoaded]=useState(false);
   const [added,setAdded]=useState(false);
@@ -21,6 +25,23 @@ export default function ShellStartupPractice(){
   const reset=()=>{setSelected('bashrc');setSystemLoaded(false);setWorkspaceLoaded(false);setAdded(false);setMessage('');};
   return <section className="panel shell-startup-practice">
     <div className="panel-heading"><span className="step-number"><FileCode2 size={15}/></span><div><h2>Make ROS 2 setup persist across terminals</h2><p>Understand startup files, setup order, duplicate entries, and why a new terminal may not know ROS_DISTRO.</p></div></div>
+    <div className="startup-decision-tree">
+      <h3>Interactive startup-file decision tree</h3>
+      <p>Choose how Bash starts. Follow the branches to see which startup files Bash reads by default.</p>
+      <div className="startup-decision-questions">
+        <label>1. Is this an interactive shell?
+          <select value={interactive} onChange={e=>{setInteractive(e.target.value);setOutcome('');}}><option value="yes">Yes — I can type at a prompt</option><option value="no">No — running a script or command</option></select>
+        </label>
+        <label>2. Is it a login shell?
+          <select value={login} onChange={e=>{setLogin(e.target.value);setOutcome('');}}><option value="no">No — ordinary terminal tab</option><option value="yes">Yes — login session</option></select>
+        </label>
+        <label>3. Which login file exists? (if applicable)
+          <select value={profile} onChange={e=>{setProfile(e.target.value);setOutcome('');}}><option value="bash_profile">~/.bash_profile exists</option><option value="bash_login">Only ~/.bash_login exists</option><option value="profile">Only ~/.profile exists</option><option value="none">None of these exists</option></select>
+        </label>
+      </div>
+      <button className="button-primary" onClick={()=>setOutcome('shown')}>Trace startup files</button>
+      {outcome&&<div className="startup-decision-result"><b>Startup trace</b><ol>{(!interactive||interactive==='yes')&&login==='no'?[<li key="bashrc"><code>~/.bashrc</code> — read by an interactive non-login Bash shell.</li>]:login==='yes'?[<><li key="system"><code>/etc/profile</code> — read if it exists.</li><li key="personal">{profile==='bash_profile'?<><code>~/.bash_profile</code> — first available personal login file.</>:profile==='bash_login'?<><code>~/.bash_login</code> — selected because <code>~/.bash_profile</code> is absent.</>:profile==='profile'?<><code>~/.profile</code> — selected because the two higher-priority files are absent.</>:<>No personal login file from the three standard choices was found.</>}</li><li key="bashrc-note">A login profile may source <code>~/.bashrc</code>, but Bash does not automatically read it as a separate step for every login shell.</li></>]:[<li key="noninteractive">An ordinary non-interactive Bash shell does not normally read <code>~/.bashrc</code> or the personal login profiles. Special modes such as remote-command shells and the <code>BASH_ENV</code> variable can change behavior.</li>]}</ol><p><b>ROS implication:</b> if the selected startup path never loads your ROS setup script, <code>ROS_DISTRO</code> may be empty in that shell. Confirm which file is actually read before editing configuration.</p></div>}
+    </div>
     <div className="startup-deep-dive">
       <h3>First principles: what is a shell startup file?</h3>
       <p>Bash is a program that reads commands and runs them. A startup file is a script Bash automatically reads in certain launch situations. It does not apply to every shell or every process: the result depends on whether the shell is interactive, a login shell, and whether it is Bash or another shell such as Zsh.</p>

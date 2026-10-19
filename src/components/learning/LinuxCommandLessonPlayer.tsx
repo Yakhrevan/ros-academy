@@ -30,11 +30,12 @@ type Props = {
   onNextLesson: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  onProgressChange: (lessonId: string, practised: string[], passedChecks: string[]) => void;
 };
 
 const INITIAL_CWD = '/home/student';
 
-export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, onComplete, onPreviousLesson, onNextLesson, canGoPrevious, canGoNext }: Props) {
+export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, onComplete, onPreviousLesson, onNextLesson, canGoPrevious, canGoNext, onProgressChange }: Props) {
   const definition = commandLessons[lesson.id];
   const navigationOrder = ['pwd', 'ls', 'cd-into-workspace', 'ls-workspace', 'cd-src', 'ls-src', 'cd-package', 'cd-back-one', 'cd-back-two', 'cd-home', 'cd-absolute', 'cd-previous', 'cd-wrong-path', 'ls-details'];
   const steps = (definition?.steps ?? []).filter((item) => !['cd-ros2-ws', 'pwd-verify', 'cd-parent'].includes(item.id)).slice().sort((a, b) => {
@@ -90,6 +91,11 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
       setChecksLoadedFor(lesson.id);
     }
   }, [lesson.id]);
+
+  useEffect(() => {
+    if (progressLoadedFor !== lesson.id || checksLoadedFor !== lesson.id) return;
+    onProgressChange(lesson.id, completedSteps, passedChecks);
+  }, [lesson.id, completedSteps, passedChecks, progressLoadedFor, checksLoadedFor, onProgressChange]);
 
   useEffect(() => {
     if (checksLoadedFor !== lesson.id) return;

@@ -7,6 +7,7 @@ import FileOperationsPractice from './FileOperationsPractice';
 import FileReadingPractice from './FileReadingPractice';
 import PipelinePractice from './PipelinePractice';
 import ProcessManagementPractice from './ProcessManagementPractice';
+import TextSearchPractice from './TextSearchPractice';
 import EnvironmentVariablesPractice from './EnvironmentVariablesPractice';
 import ShellStartupPractice from './ShellStartupPractice';
 import PackageSystemInspectionPractice from './PackageSystemInspectionPractice';
@@ -129,6 +130,7 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
     {lesson.id === 'linux-files' && <FileReadingPractice />}
     {lesson.id === 'linux-files' && <PipelinePractice />}
     {lesson.id === 'linux-files' && <ProcessManagementPractice />}
+    {lesson.id === 'linux-files' && <TextSearchPractice />}
     {lesson.id === 'linux-files' && <EnvironmentVariablesPractice />}
     {lesson.id === 'linux-files' && <ShellStartupPractice />}
     {lesson.id === 'linux-files' && <PackageSystemInspectionPractice />}

@@ -211,12 +211,12 @@ export default function LinuxCommandLessonPlayer({ lesson, completed, onBack, on
           {showHints && <div className="explanation-box good"><b>Explain it in your own words</b><p>{step.purpose} {step.commonMistake}</p></div>}
           <div className="command-step-navigation">
             <button className="button-secondary" disabled={stepIndex === 0} onClick={() => chooseStep(stepIndex - 1)}><ArrowLeft size={15}/> Previous command</button>
-            <button className="button-primary" onClick={nextStep}>{stepIndex === steps.length - 1 ? 'Next lesson' : 'Next command'} <ArrowRight size={15}/></button>
+            <button className="button-primary" onClick={nextStep} disabled={stepIndex === steps.length - 1}>{stepIndex === steps.length - 1 ? 'All commands complete' : 'Next command'} {stepIndex === steps.length - 1 ? <CheckCircle2 size={15}/> : <ArrowRight size={15}/>}</button>
           </div>
           {stepIndex === steps.length - 1 && <button className={'button-secondary full command-complete-button ' + (completed ? 'is-complete' : '')} onClick={() => onComplete(lesson.id)}>{completed ? <><CheckCircle2 size={16}/> Lesson completed</> : <>Complete lesson <CheckCircle2 size={16}/></>}</button>}
           <div className="step-dots" aria-label="Command steps">{steps.map((item, index) => <button key={item.id} className={index === stepIndex ? 'active' : index < stepIndex ? 'visited' : ''} aria-label={'Go to ' + item.title} title={item.title} onClick={() => chooseStep(index)}/>)}</div>
         </article>
-        <div className="command-bottom-navigation"><button className="button-secondary" disabled={!canGoPrevious} onClick={onPreviousLesson}><ArrowLeft size={15}/> Previous lesson</button><button className="button-secondary" disabled={!canGoNext} onClick={onNextLesson}>Next lesson <ArrowRight size={15}/></button></div>
+        <div className="command-bottom-navigation"><div className="lesson-navigation-label"><b>Lesson navigation</b><span>Move between topics independently of command steps.</span></div><div className="lesson-navigation-actions"><button className="button-secondary" disabled={!canGoPrevious} onClick={onPreviousLesson}><ArrowLeft size={15}/> Previous lesson</button><button className="button-primary" disabled={!canGoNext} onClick={onNextLesson}>Next lesson <ArrowRight size={15}/></button></div></div>
       </aside>
     </div>
   </section>;

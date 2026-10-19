@@ -262,6 +262,31 @@ export function executeCommand(raw: string, cwd: string, steps: CommandStep[]): 
     return { command, output: '', status: (append ? 'Appended to ' : 'Wrote ') + path + ' in the virtual filesystem only. Read it with cat to verify.', cwd };
   }
 
+  // Small, deterministic pipeline support for grep over virtual text. No subprocesses are launched.
+  if (command.includes('|')) {
+    const parts = command.split('|').map((part) => part.trim());
+    if (parts.length !== 2 || !parts[1].startsWith('grep ')) return { command, output: '', status: 'This virtual terminal supports simple pipelines of the form cat FILE | grep PATTERN or printf TEXT | grep PATTERN.', cwd };
+    const source = parts[0];
+    const filter = parts[1].slice(5).trim().split(/\s+/);
+    const pattern = (filter[0] || '').replace(/^['"]|['"]$/g, '');
+    if (!pattern) return { command, output: '', status: 'Usage: cat FILE | grep PATTERN', cwd };
+    let input = '';
+    if (source.startsWith('cat ')) {
+      const path = resolvePath(source.slice(4).trim().replace(/^['"]|['"]$/g, ''), cwd);
+      if (!Object.prototype.hasOwnProperty.call(FS, path)) return { command, output: '', status: 'cat: no such file in virtual filesystem: ' + path, cwd };
+      if (FS[path]) return { command, output: '', status: 'cat: ' + path + ': is a directory', cwd };
+      input = virtualFileContents[path] ?? '';
+    } else if (source.startsWith('printf ')) {
+      input = source.slice(7).trim().replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+    } else if (source.startsWith('echo ')) {
+      input = shellQuoteTrim(source.slice(5)) + '\n';
+    } else {
+      return { command, output: '', status: 'Unsupported pipeline source. Try cat FILE or printf TEXT before the pipe.', cwd };
+    }
+    const matches = input.split(/\r?\n/).filter((line) => line.includes(pattern));
+    return { command, output: matches.join('\n'), status: matches.length ? 'Filtered simulated pipeline output; no host commands were executed.' : 'Pipeline completed with no matching lines.', cwd };
+  }
+
   if (command.startsWith('grep ')) {
     const args = command.slice(5).trim().split(/\s+/);
     if (args.length < 2) return { command, output: '', status: 'Usage: grep PATTERN FILE', cwd };
